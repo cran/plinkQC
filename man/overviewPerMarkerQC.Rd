@@ -30,11 +30,12 @@ columns are all QC steps applied by perMarkerQC (max=3), with entries=0 if
 passing the QC and entries=1 if failing that particular QC.
 }
 \description{
-Overview of per marker QC
+\code{overviewPerMarkerQC} depicts results of \code{\link{perMarkerQC}} as
+an intersection plot (via \code{\link[UpSetR]{upset}}) and returns a
+dataframe indicating which QC checks were failed or passed.
 }
 \examples{
-package.dir <- find.package('plinkQC')
-indir <- file.path(package.dir, 'extdata')
+indir <- system.file("extdata", package="plinkQC")
 qcdir <- tempdir()
 name <- "data"
 path2plink <- '/path/to/plink'

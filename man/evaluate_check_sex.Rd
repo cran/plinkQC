@@ -50,7 +50,7 @@ information in externalSex.}
 
 \item{path2plink}{[character] Absolute path to directory where external plink
 software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-plink should be accesible as path2plink/plink -h. If not
+plink should be accessible as path2plink/plink -h. If not
 provided, assumed that PATH set-up works and plink will be found by
 system("plink").}
 
@@ -98,9 +98,10 @@ description on the PLINK output format page:
 \url{https://www.cog-genomics.org/plink/1.9/formats#sexcheck}.
 }
 \examples{
-package.dir <- find.package('plinkQC')
-qcdir <- file.path(package.dir, 'extdata')
+qcdir <- system.file("extdata", package="plinkQC")
 name <- "data"
+\dontrun{
 fail_sex <- evaluate_check_sex(qcdir=qcdir, name=name, interactive=FALSE,
 verbose=FALSE)
+}
 }

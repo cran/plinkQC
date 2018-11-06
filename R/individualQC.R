@@ -12,7 +12,7 @@
 #' do.run_[analysis] is FALSE, \code{perIndividualQC} expects the
 #' analysis-specific plink output files in qcdir i.e. do.check_sex expects
 #' name.sexcheck, do.evaluate_check_het_and_miss expects name.het and name.imiss,
-#' do.evauluate_check_relatedness expects name.genome and name.imiss and
+#' do.evaluate_check_relatedness expects name.genome and name.imiss and
 #' do.evaluate_check_ancestry expects prefixMergeData.eigenvec. If these files
 #' are not present \code{perIndividualQC} will fail with missing file error.
 #' Setting do.run_[analysis] TRUE will execute the checks and create the
@@ -100,7 +100,7 @@
 #' prefixMergedDataset.eigenvec and population identifier [refSamplesPop]
 #' corresponding to population IDs [refColorsPop] in refColorsfile/refColors.
 #' @param refColorsFile [character, optional]
-#' /path/to/File/with/Population/Colors cotaining population IDs in column
+#' /path/to/File/with/Population/Colors containing population IDs in column
 #' [refColorsPop] and corresponding color-code for PCA plot in column
 #' [refColorsColor].If not provided and is.null(refColors) default colors for
 #' are used.
@@ -115,7 +115,7 @@
 #' @param studyColor [character] Color to be used for study population.
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -144,7 +144,7 @@
 #' hetTh, 4. mismatched_sex containing a [vector] with the sample IIDs failing
 #' the sexcheck based on SNPSEX and femaleTh/maleTh and 5. ancestry containing
 #' a vector with sample IIDs failing the ancestry check based on europeanTh and
-#' ii) p_sampleQC, a ggplot2-object 'containing' a sub-panelled plot with the
+#' ii) p_sampleQC, a ggplot2-object 'containing' a sub-paneled plot with the
 #' QC-plots of \code{\link{check_sex}},
 #' \code{\link{check_het_and_miss}},
 #' \code{\link{check_relatedness}} and \code{\link{check_ancestry}}, which can
@@ -158,8 +158,7 @@
 #' function individually.
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir, 'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' qcdir <- tempdir()
 #' name <- "data"
 #' # All quality control checks
@@ -423,8 +422,7 @@ perIndividualQC <- function(indir, name, qcdir=indir,
 #' Ancestry_fail, with entries=0 if passing and entries=1 if failing that check.
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir, 'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' qcdir <- tempdir()
 #' name <- "data"
 #' \dontrun{
@@ -535,7 +533,7 @@ overviewPerIndividualQC <- function(results_perIndividualQC, interactive=FALSE) 
 #'
 #' \code{\link{check_sex}} wraps around \code{\link{run_check_sex}}  and
 #' \code{\link{evaluate_check_sex}} . If run.check_sex is TRUE,
-#' \code{\link{run_check_sex} } is excuted; otherwise it is assumed that plink
+#' \code{\link{run_check_sex} } is executed ; otherwise it is assumed that plink
 #' --check-sex has been run externally and qcdir/name.sexcheck exists.
 #' \code{\link{check_sex}}  will fail with missing file error otherwise.
 #'
@@ -579,7 +577,7 @@ overviewPerIndividualQC <- function(results_perIndividualQC, interactive=FALSE) 
 #' other_arguments) or pdf(outfile) print(p_sexcheck) dev.off().
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -594,11 +592,12 @@ overviewPerIndividualQC <- function(results_perIndividualQC, interactive=FALSE) 
 #' (PEDSEX), which can be shown by print(p_sexcheck).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' qcdir <- file.path(package.dir, 'extdata')
+#'  \dontrun{
+#' indir <- system.file("extdata", package="plinkQC")
 #' name <- "data"
-#' fail_sex <- check_sex(indir=qcdir, name=name, run.check_sex=FALSE,
+#' fail_sex <- check_sex(indir=indir, name=name, run.check_sex=FALSE,
 #' interactive=FALSE, verbose=FALSE)
+#' }
 check_sex <- function(indir, name, qcdir=indir, maleTh=0.8, femaleTh=0.2,
                       run.check_sex=TRUE,
                       externalSex=NULL,
@@ -651,7 +650,7 @@ check_sex <- function(indir, name, qcdir=indir, maleTh=0.8, femaleTh=0.2,
 #' \code{\link{run_check_heterozygosity}} and
 #' \code{\link{evaluate_check_het_and_miss}}.
 #' If run.check_het_and_miss is TRUE, \code{\link{run_check_heterozygosity}} and
-#' \code{\link{run_check_missingness}} are excuted; otherwise it is assumed
+#' \code{\link{run_check_missingness}} are executed ; otherwise it is assumed
 #' that plink --missing and plink --het have been run externally and
 #' qcdir/name.het and qcdir/name.imiss exist.  \code{\link{check_het_and_miss}}
 #' will fail with missing file error otherwise.
@@ -684,7 +683,7 @@ check_sex <- function(indir, name, qcdir=indir, maleTh=0.8, femaleTh=0.2,
 #' larger than 0.
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -709,11 +708,12 @@ check_sex <- function(indir, name, qcdir=indir, maleTh=0.8, femaleTh=0.2,
 #' which can be shown by print(p_het_imiss).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' qcdir <- file.path(package.dir, 'extdata')
+#'  \dontrun{
+#' indir <- system.file("extdata", package="plinkQC")
 #' name <- "data"
-#' fail_het_miss <- check_het_and_miss(indir=qcdir, name=name,
+#' fail_het_miss <- check_het_and_miss(indir=indir, name=name,
 #' run.check_het_and_miss=FALSE, interactive=FALSE)
+#' }
 check_het_and_miss <- function(indir, name, qcdir=indir, imissTh=0.03, hetTh=3,
                                run.check_het_and_miss=TRUE,
                                interactive=FALSE, verbose=FALSE,
@@ -755,7 +755,7 @@ check_het_and_miss <- function(indir, name, qcdir=indir, imissTh=0.03, hetTh=3,
 #' \code{\link{check_relatedness}} wraps around
 #' \code{\link{run_check_relatedness}} and
 #' \code{\link{evaluate_check_relatedness}}. If run.check_relatedness is TRUE,
-#' \code{\link{run_check_relatedness}} is excuted; otherwise it is assumed that
+#' \code{\link{run_check_relatedness}} is executed ; otherwise it is assumed that
 #' plink --genome has been run externally and qcdir/name.genome exists.
 #' \code{\link{check_relatedness}}  will fail with missing file error otherwise.
 #'
@@ -783,7 +783,7 @@ check_het_and_miss <- function(indir, name, qcdir=indir, imissTh=0.03, hetTh=3,
 #' individual; has to be proportion between (0,1)
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -812,11 +812,12 @@ check_het_and_miss <- function(indir, name, qcdir=indir, imissTh=0.03, hetTh=3,
 #' shown by print(p_IBD).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' qcdir <- file.path(package.dir,'extdata')
+#' \dontrun{
+#' indir <- system.file("extdata", package="plinkQC")
 #' name <- 'data'
-#' relatednessQC <- check_relatedness(indir=qcdir, name=name, interactive=FALSE,
+#' relatednessQC <- check_relatedness(indir=indir, name=name, interactive=FALSE,
 #' run.check_relatedness=FALSE)
+#' }
 check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.1875,
                               imissTh=0.03, run.check_relatedness=TRUE,
                               interactive=FALSE, verbose=FALSE,
@@ -825,6 +826,7 @@ check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.1875,
         run <- run_check_relatedness(indir=indir, qcdir=qcdir, name=name,
                                      verbose=verbose,
                                      path2plink=path2plink,
+                                     highIBDTh=highIBDTh,
                                      showPlinkOutput=showPlinkOutput)
     }
     fail <- evaluate_check_relatedness(qcdir=qcdir, name=name,
@@ -885,7 +887,7 @@ check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.1875,
 #' prefixMergedDataset.eigenvec and population identifier [refSamplesPop]
 #' corresponding to population IDs [refColorsPop] in refColorsfile/refColors.
 #' @param refColorsFile [character, optional]
-#' /path/to/File/with/Population/Colors cotaining population IDs in column
+#' /path/to/File/with/Population/Colors containing population IDs in column
 #' [refColorsPop] and corresponding colour-code for PCA plot in column
 #' [refColorsColor].If not provided and is.null(refColors) default colors for
 #' are used.
@@ -900,7 +902,7 @@ check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.1875,
 #' @param studyColor [character] Colour to be used for study population.
 #' @param run.check_ancestry [logical] Should plink --pca be run to
 #' determine principal components of merged dataset; if FALSE, it is assumed
-#' that plink --pca has been run successfuly and
+#' that plink --pca has been run successfully and
 #' qcdir/prefixMergedDataset.eigenvec is present;
 #' \code{\link{check_ancestry}} will fail with missing file error otherwise.
 #' @param interactive [logical] Should plots be shown interactively? When
@@ -910,7 +912,7 @@ check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.1875,
 #' other_arguments) or pdf(outfile) print(p_ancestry) dev.off().
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -923,14 +925,15 @@ check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.1875,
 #' print(p_ancestry).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' qcdir <- file.path(package.dir, 'extdata')
+#' \dontrun{
+#' indir <- system.file("extdata", package="plinkQC")
 #' name <- "data"
-#' fail_ancestry <- check_ancestry(indir=qcdir, name=name,
-#' refSamplesFile=paste(qcdir, "/HapMap_ID2Pop.txt",sep=""),
-#' refColorsFile=paste(qcdir, "/HapMap_PopColors.txt", sep=""),
+#' fail_ancestry <- check_ancestry(indir=indir, name=name,
+#' refSamplesFile=paste(indir, "/HapMap_ID2Pop.txt",sep=""),
+#' refColorsFile=paste(indir, "/HapMap_PopColors.txt", sep=""),
 #' prefixMergedDataset="data.HapMapIII", interactive=FALSE,
 #' run.check_ancestry=FALSE)
+#' }
 
 check_ancestry <- function(indir, name, qcdir=indir, prefixMergedDataset,
                            europeanTh=1.5,
@@ -949,7 +952,7 @@ check_ancestry <- function(indir, name, qcdir=indir, prefixMergedDataset,
                                       path2plink=path2plink,
                                       showPlinkOutput=showPlinkOutput)
         }
-        fail <- evaluate_check_ancestry(qcdir=qcdir,indir=indir, name=name,
+        fail <- evaluate_check_ancestry(qcdir=qcdir, indir=indir, name=name,
                                         prefixMergedDataset=prefixMergedDataset,
                                         europeanTh=europeanTh,
                                         refSamples=refSamples,
@@ -984,7 +987,7 @@ check_ancestry <- function(indir, name, qcdir=indir, prefixMergedDataset,
 #' name.fam.
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -992,8 +995,7 @@ check_ancestry <- function(indir, name, qcdir=indir, prefixMergedDataset,
 #' @param verbose [logical] If TRUE, progress info is printed to standard out.
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir,'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' name <- 'data'
 #' qcdir <- tempdir()
 #' # the following code is not run on package build, as the path2plink on the
@@ -1022,7 +1024,7 @@ run_check_sex <- function(indir, name, qcdir=indir, verbose=FALSE,
     system(paste(path2plink, "plink --bfile ", prefix,
                  " --check-sex",
                  " --out ", out, sep=""),
-           ignore.stdout=showPlinkOutput, ignore.stderr=!showPlinkOutput)
+           ignore.stdout=!showPlinkOutput, ignore.stderr=!showPlinkOutput)
 }
 
 #' Evaluate results from PLINK sex check.
@@ -1081,7 +1083,7 @@ run_check_sex <- function(indir, name, qcdir=indir, verbose=FALSE,
 #' other_arguments) or pdf(outfile) print(p_sexcheck) dev.off().
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -1096,11 +1098,12 @@ run_check_sex <- function(indir, name, qcdir=indir, verbose=FALSE,
 #' be shown by print(p_sexcheck).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' qcdir <- file.path(package.dir, 'extdata')
+#' qcdir <- system.file("extdata", package="plinkQC")
 #' name <- "data"
+#' \dontrun{
 #' fail_sex <- evaluate_check_sex(qcdir=qcdir, name=name, interactive=FALSE,
 #' verbose=FALSE)
+#' }
 evaluate_check_sex <- function(qcdir, name, maleTh=0.8,
                                femaleTh=0.2, externalSex=NULL,
                                fixMixup=FALSE, indir=qcdir,
@@ -1200,7 +1203,7 @@ evaluate_check_sex <- function(qcdir, name, maleTh=0.8,
                                  " --update-sex ", file_mixup,
                                  " --make-bed ",
                                  " --out ", prefix, sep=""),
-                           ignore.stdout=showPlinkOutput,
+                           ignore.stdout=!showPlinkOutput,
                            ignore.stderr=!showPlinkOutput)
                 } else {
                     if (verbose) {
@@ -1277,7 +1280,7 @@ evaluate_check_sex <- function(qcdir, name, maleTh=0.8,
 #' name.fam.
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -1285,8 +1288,7 @@ evaluate_check_sex <- function(qcdir, name, maleTh=0.8,
 #' @param verbose [logical] If TRUE, progress info is printed to standard out.
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir,'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' name <- 'data'
 #' qcdir <- tempdir()
 #' # the following code is not run on package build, as the path2plink on the
@@ -1316,7 +1318,7 @@ run_check_heterozygosity <- function(indir, name, qcdir=indir, verbose=FALSE,
     system(paste(path2plink, "plink --bfile ", prefix,
                  " --het",
                  " --out ", out, sep=""),
-           ignore.stdout=showPlinkOutput, ignore.stderr=!showPlinkOutput)
+           ignore.stdout=!showPlinkOutput, ignore.stderr=!showPlinkOutput)
 }
 
 #' Run PLINK missingness rate calculation
@@ -1338,7 +1340,7 @@ run_check_heterozygosity <- function(indir, name, qcdir=indir, verbose=FALSE,
 #' name.fam.
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -1346,8 +1348,7 @@ run_check_heterozygosity <- function(indir, name, qcdir=indir, verbose=FALSE,
 #' @param verbose [logical] If TRUE, progress info is printed to standard out.
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir,'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' name <- 'data'
 #' qcdir <- tempdir()
 #' # the following code is not run on package build, as the path2plink on the
@@ -1377,7 +1378,7 @@ run_check_missingness <- function(indir, name, qcdir=indir, verbose=FALSE,
     system(paste(path2plink, "plink --bfile ", prefix,
                  " --missing",
                  " --out ", out, sep=""),
-           ignore.stdout=showPlinkOutput, ignore.stderr=!showPlinkOutput)
+           ignore.stdout=!showPlinkOutput, ignore.stderr=!showPlinkOutput)
 }
 
 #' Evaluate results from PLINK missing genotype and heterozygosity rate check.
@@ -1441,11 +1442,12 @@ run_check_missingness <- function(indir, name, qcdir=indir, verbose=FALSE,
 #' which can be shown by print(p_het_imiss).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' qcdir <- file.path(package.dir, 'extdata')
+#' qcdir <- system.file("extdata", package="plinkQC")
 #' name <- "data"
+#' \dontrun{
 #' fail_het_miss <- evaluate_check_het_and_miss(qcdir=qcdir, name=name,
 #' interactive=FALSE)
+#' }
 evaluate_check_het_and_miss <- function(qcdir, name, imissTh=0.03,
                                   hetTh=3, interactive=FALSE) {
     prefix <- paste(qcdir, "/", name, sep="")
@@ -1546,9 +1548,12 @@ evaluate_check_het_and_miss <- function(qcdir, name, imissTh=0.03,
 #' qcdir=indir.
 #' @param name [character] Prefix of PLINK files, i.e. name.bed, name.bim,
 #' name.fam.
+#' @param highIBDTh [double] Threshold for acceptable proportion of IBD between
+#' pair of individuals; only pairwise relationship estimates larger than this
+#' threshold will be recorded.
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -1556,8 +1561,7 @@ evaluate_check_het_and_miss <- function(qcdir, name, imissTh=0.03,
 #' @param verbose [logical] If TRUE, progress info is printed to standard out.
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir,'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' name <- 'data'
 #' qcdir <- tempdir()
 #' # the following code is not run on package build, as the path2plink on the
@@ -1565,7 +1569,8 @@ evaluate_check_het_and_miss <- function(qcdir, name, imissTh=0.03,
 #' \dontrun{
 #' run <- run_check_relatedness(indir=indir, qcdir=qcdir, name=name)
 #' }
-run_check_relatedness <- function(indir, name, qcdir=indir, path2plink=NULL,
+run_check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.185,
+                                  path2plink=NULL,
                                   showPlinkOutput=TRUE, verbose=FALSE) {
     prefix <- paste(indir, "/", name, sep="")
     out <- paste(qcdir, "/", name, sep="")
@@ -1578,8 +1583,7 @@ run_check_relatedness <- function(indir, name, qcdir=indir, path2plink=NULL,
     if (!file.exists(paste(prefix, ".bed", sep=""))){
         stop("plink binary file: ", prefix, ".bed does not exist.")
     }
-    package.dir <- find.package('plinkQC')
-    highld <- file.path(package.dir,'extdata', 'high-LD-regions.txt')
+    highld <- system.file("extdata", 'high-LD-regions.txt', package="plinkQC")
     if (!is.null(path2plink)) {
         path2plink <- paste(gsub("/$", "", path2plink), "/", sep="")
     }
@@ -1589,18 +1593,19 @@ run_check_relatedness <- function(indir, name, qcdir=indir, path2plink=NULL,
                  " --exclude range ", highld,
                  " --indep-pairwise 50 5 0.2",
                  " --out ", out, sep=""),
-           ignore.stdout=showPlinkOutput, ignore.stderr=!showPlinkOutput)
+           ignore.stdout=!showPlinkOutput, ignore.stderr=!showPlinkOutput)
     if (verbose) message("Run check_relatedness via plink --genome")
     system(paste(path2plink, "plink --bfile ", prefix,
                  " --extract ", out, ".prune.in",
                  " --maf 0.1 --genome",
+                 " --min ", highIBDTh,
                  " --out ", out, sep=""),
-           ignore.stdout=showPlinkOutput, ignore.stderr=!showPlinkOutput)
+           ignore.stdout=!showPlinkOutput, ignore.stderr=!showPlinkOutput)
     if (! file.exists(paste(prefix, ".imiss", sep=""))) {
         system(paste(path2plink, "plink --bfile ", prefix,
                      " --missing",
                      " --out ", out, sep=""),
-           ignore.stdout=showPlinkOutput, ignore.stderr=!showPlinkOutput)
+           ignore.stdout=!showPlinkOutput, ignore.stderr=!showPlinkOutput)
     }
 }
 
@@ -1665,11 +1670,12 @@ run_check_relatedness <- function(indir, name, qcdir=indir, path2plink=NULL,
 #' shown by print(p_IBD).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' qcdir <- file.path(package.dir,'extdata')
+#' qcdir <- system.file("extdata", package="plinkQC")
 #' name <- 'data'
+#' \dontrun{
 #' relatednessQC <- evaluate_check_relatedness(qcdir=qcdir, name=name,
 #' interactive=FALSE)
+#' }
 evaluate_check_relatedness <- function(qcdir, name, highIBDTh=0.1875,
                                        imissTh=0.03, interactive=FALSE,
                                        verbose=FALSE) {
@@ -1759,7 +1765,7 @@ evaluate_check_relatedness <- function(qcdir, name, highIBDTh=0.1875,
 #' prefixMergedDataset.fam.
 #' @param path2plink [character] Absolute path to directory where external plink
 #' software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-#' plink should be accesible as path2plink/plink -h. If not
+#' plink should be accessible as path2plink/plink -h. If not
 #' provided, assumed that PATH set-up works and plink will be found by
 #' system("plink").
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
@@ -1767,8 +1773,7 @@ evaluate_check_relatedness <- function(qcdir, name, highIBDTh=0.1875,
 #' @param verbose [logical] If TRUE, progress info is printed to standard out.
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir,'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' qcdir <- tempdir()
 #' prefixMergedDataset <- 'data.HapMapIII'
 #' # the following code is not run on package build, as the path2plink on the
@@ -1799,7 +1804,7 @@ run_check_ancestry <- function(indir, prefixMergedDataset,
     system(paste(path2plink, "plink --bfile ", prefix,
                  " --pca",
                  " --out ", out, sep=""),
-           ignore.stdout=showPlinkOutput, ignore.stderr=!showPlinkOutput)
+           ignore.stdout=!showPlinkOutput, ignore.stderr=!showPlinkOutput)
 }
 
 #' Evaluate results from PLINK PCA on combined study and reference data
@@ -1850,12 +1855,15 @@ run_check_ancestry <- function(indir, prefixMergedDataset,
 #' @param refSamplesFile [character] /path/to/File/with/reference samples. Needs
 #' columns with sample identifiers [refSamplesIID] corresponding to IIDs in
 #' prefixMergedDataset.eigenvec and population identifier [refSamplesPop]
-#' corresponding to population IDs [refColorsPop] in refColorsfile/refColors.
+#' corresponding to population IDs [refColorsPop] in refColorsfile/refColors. If
+#' both refSamplesFile and refSamples are not NULL, refSamplesFile information
+#' is used.
 #' @param refColorsFile [character, optional]
-#' /path/to/File/with/Population/Colors cotaining population IDs in column
+#' /path/to/File/with/Population/Colors containing population IDs in column
 #' [refColorsPop] and corresponding colour-code for PCA plot in column
 #' [refColorsColor].If not provided and is.null(refColors) default colors for
-#' are used.
+#' are used. If both refColorsFile and refColors are not NULL, refColorsFile
+#' information is used.
 #' @param refSamplesIID [character] Column name of reference sample IDs in
 #' refSamples/refSamplesFile.
 #' @param refSamplesPop [character] Column name of reference sample population
@@ -1878,13 +1886,14 @@ run_check_ancestry <- function(indir, prefixMergedDataset,
 #' print(p_ancestry).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir, 'extdata')
+#' \dontrun{
+#' qcdir <- system.file("extdata", package="plinkQC")
 #' name <- "data"
-#' fail_ancestry <- evaluate_check_ancestry(indir=indir, name=name,
-#' refSamplesFile=paste(indir, "/HapMap_ID2Pop.txt",sep=""),
-#' refColorsFile=paste(indir, "/HapMap_PopColors.txt", sep=""),
+#' fail_ancestry <- evaluate_check_ancestry(indir=qcdir, name=name,
+#' refSamplesFile=paste(qcdir, "/HapMap_ID2Pop.txt",sep=""),
+#' refColorsFile=paste(qcdir, "/HapMap_PopColors.txt", sep=""),
 #' prefixMergedDataset="data.HapMapIII", interactive=FALSE)
+#' }
 
 evaluate_check_ancestry <- function(indir, name, prefixMergedDataset,
                                     qcdir=indir,
@@ -1913,9 +1922,11 @@ evaluate_check_ancestry <- function(indir, name, prefixMergedDataset,
     colnames(pca_data) <- c("FID", "IID", paste("PC",1:(ncol(pca_data)-2),
                                                 sep=""))
 
-    if (is.null(refSamples) && !file.exists(refSamplesFile)) {
-        stop("refSamples are not specified and refSamplesFile file",
-             refSamplesFile, "does not exist.")
+    if (is.null(refSamples) && is.null(refSamplesFile)) {
+        stop("Neither refSamples nor refSamplesFile are specified")
+    }
+    if (!is.null(refSamplesFile) && !file.exists(refSamplesFile)) {
+        stop("refSamplesFile file", refSamplesFile, "does not exist.")
     }
     if (!is.null(refSamplesFile)) {
         refSamples <- read.table(refSamplesFile, header=TRUE,
@@ -1930,6 +1941,8 @@ evaluate_check_ancestry <- function(indir, name, prefixMergedDataset,
     names(refSamples)[names(refSamples) == refSamplesIID] <- "IID"
     names(refSamples)[names(refSamples) == refSamplesPop] <- "Pop"
     refSamples <- dplyr::select_(refSamples, ~IID, ~Pop)
+    refSamples$IID <- as.character(refSamples$IID)
+    refSamples$Pop <- as.character(refSamples$Pop)
 
     if (!is.null(refColorsFile) && !file.exists(refColorsFile)) {
         stop("refColorsFile file", refColorsFile, "does not exist.")
@@ -1948,16 +1961,29 @@ evaluate_check_ancestry <- function(indir, name, prefixMergedDataset,
         names(refColors)[names(refColors) == refColorsColor] <- "Color"
         names(refColors)[names(refColors) == refColorsPop] <- "Pop"
         refColors <- dplyr::select_(refColors, ~Pop, ~Color)
+        refColors$Color <- as.character(refColors$Color)
+        refColors$Pop <- as.character(refColors$Pop)
     } else {
-        refColors <- data.frame(Pop=unique(as.character(refSamples$Pop)))
+        refColors <- data.frame(Pop=unique(as.character(refSamples$Pop)),
+                                stringsAsFactors=FALSE)
         refColors$Color <- 1:nrow(refColors)
+    }
+    if (!all(refSamples$Pop %in% refColors$Pop)) {
+        missing <- refSamples$Pop[!refSamples$Pop %in% refColors$Pop]
+        stop("Not all refSamples populations found in population code of
+             refColors; missing population codes: ", paste(missing,
+                                                           collapse=","))
     }
     refSamples <- merge(refSamples, refColors, by="Pop", all.X=TRUE)
 
     ## Combine pca data and population information ####
     data_all <- merge(pca_data, refSamples, by="IID", all.x=TRUE)
-    data_all$Pop[is.na(data_all$Pop)] <- name
-    data_all$Color[is.na(data_all$Color)] <- studyColor
+    data_all$Pop[data_all$IID %in% samples$IID] <- name
+    data_all$Color[data_all$IID %in% samples$IID] <- studyColor
+    if (any(is.na(data_all))) {
+        stop("There are samples in the prefixMergedDataset that cannot be found
+             in refSamples or ", prefix, ".fam")
+    }
     data_all <- data_all[order(data_all$Pop, decreasing=FALSE),]
 
     refColors <- rbind(refColors, c(name, studyColor))

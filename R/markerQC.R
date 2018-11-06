@@ -59,8 +59,7 @@
 #' these function documentations.
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir, 'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' qcdir <- tempdir()
 #' name <- "data"
 #' path2plink <- '/path/to/plink'
@@ -131,7 +130,7 @@ perMarkerQC <- function(indir, qcdir=indir, name,
 
 #' Overview of per marker QC
 #'
-#' \code{overviewPerMarkerQC} depicts results of \code{\link{perMarkerQC} as
+#' \code{overviewPerMarkerQC} depicts results of \code{\link{perMarkerQC}} as
 #' an intersection plot (via \code{\link[UpSetR]{upset}}) and returns a
 #' dataframe indicating which QC checks were failed or passed.
 #'
@@ -155,8 +154,7 @@ perMarkerQC <- function(indir, qcdir=indir, name,
 #' passing the QC and entries=1 if failing that particular QC.
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir, 'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' qcdir <- tempdir()
 #' name <- "data"
 #' path2plink <- '/path/to/plink'
@@ -266,8 +264,7 @@ overviewPerMarkerQC <- function(results_perMarkerQC, interactive=FALSE) {
 #' SNP missingness histogram which can be shown by (print(p_lmiss)).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir, 'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' qcdir <- tempdir()
 #' name <- "data"
 #' path2plink <- '/path/to/plink'
@@ -411,8 +408,7 @@ check_snp_missingness <- function(indir, name, qcdir=indir, lmissTh=0.01,
 #' (print(p_hwe)).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir, 'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' qcdir <- tempdir()
 #' name <- "data"
 #' path2plink <- '/path/to/plink'
@@ -519,7 +515,7 @@ check_hwe <- function(indir, name, qcdir=indir, hweTh=1e-5, interactive=FALSE,
 #' name.fam.
 #' @param mafTh [double] Threshold for minor allele frequency cut-off.
 #' @param macTh [double] Threshold for minor allele cut cut-off, if both mafTh
-#' and macTh are specied, macTh is used (macTh = mafTh\*2\*NrSamples).
+#' and macTh are specified, macTh is used (macTh = mafTh\*2\*NrSamples).
 #' @param interactive [logical] Should plots be shown interactively? When
 #' choosing this option, make sure you have X-forwarding/graphical interface
 #' available for interactive plotting. Alternatively, set interactive=FALSE and
@@ -542,8 +538,7 @@ check_hwe <- function(indir, name, qcdir=indir, hweTh=1e-5, interactive=FALSE,
 #' shown by (print(p_maf)).
 #' @export
 #' @examples
-#' package.dir <- find.package('plinkQC')
-#' indir <- file.path(package.dir, 'extdata')
+#' indir <- system.file("extdata", package="plinkQC")
 #' qcdir <- tempdir()
 #' name <- "data"
 #' path2plink <- '/path/to/plink'

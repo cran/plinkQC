@@ -22,7 +22,7 @@ qcdir=indir.}
 
 \item{path2plink}{[character] Absolute path to directory where external plink
 software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-plink should be accesible as path2plink/plink -h. If not
+plink should be accessible as path2plink/plink -h. If not
 provided, assumed that PATH set-up works and plink will be found by
 system("plink").}
 
@@ -40,8 +40,7 @@ All, \code{\link{run_check_heterozygosity}},
 \code{\link{check_het_and_miss}}.
 }
 \examples{
-package.dir <- find.package('plinkQC')
-indir <- file.path(package.dir,'extdata')
+indir <- system.file("extdata", package="plinkQC")
 name <- 'data'
 qcdir <- tempdir()
 # the following code is not run on package build, as the path2plink on the

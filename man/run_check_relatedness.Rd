@@ -4,8 +4,8 @@
 \alias{run_check_relatedness}
 \title{Run PLINK IBD estimation}
 \usage{
-run_check_relatedness(indir, name, qcdir = indir, path2plink = NULL,
-  showPlinkOutput = TRUE, verbose = FALSE)
+run_check_relatedness(indir, name, qcdir = indir, highIBDTh = 0.185,
+  path2plink = NULL, showPlinkOutput = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{indir}{[character] /path/to/directory containing the basic PLINK data
@@ -18,9 +18,13 @@ name.fam.}
 by plink --genome. User needs writing permission to qcdir. Per default
 qcdir=indir.}
 
+\item{highIBDTh}{[double] Threshold for acceptable proportion of IBD between
+pair of individuals; only pairwise relationship estimates larger than this
+threshold will be recorded.}
+
 \item{path2plink}{[character] Absolute path to directory where external plink
 software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-plink should be accesible as path2plink/plink -h. If not
+plink should be accessible as path2plink/plink -h. If not
 provided, assumed that PATH set-up works and plink will be found by
 system("plink").}
 
@@ -46,8 +50,7 @@ Both \code{\link{run_check_relatedness}} and its evaluation via
 \code{\link{check_relatedness}}.
 }
 \examples{
-package.dir <- find.package('plinkQC')
-indir <- file.path(package.dir,'extdata')
+indir <- system.file("extdata", package="plinkQC")
 name <- 'data'
 qcdir <- tempdir()
 # the following code is not run on package build, as the path2plink on the
