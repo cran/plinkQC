@@ -1,7 +1,7 @@
 Package: plinkQC
 Type: Package
 Title: Genotype Quality Control with 'PLINK'
-Version: 0.1.1
+Version: 0.2.0
 Authors@R: 
     person("Hannah", "Meyer", email = "hannah@ebi.ac.uk",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4564-0899"))
@@ -21,7 +21,7 @@ Description: Genotyping arrays enable the direct measurement of an individuals
     in the study.
 Depends: R (>= 3.3.0)
 Imports: methods, optparse, data.table (>= 1.11.0), R.utils, ggplot2,
-        ggforce, ggrepel, cowplot, UpSetR, dplyr
+        ggforce, ggrepel, cowplot, UpSetR, dplyr, sys
 Suggests: testthat, knitr, rmarkdown
 License: MIT + file LICENSE
 SystemRequirements: plink (1.9)
@@ -30,7 +30,7 @@ LazyData: true
 RoxygenNote: 6.1.0
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2018-11-06 11:53:42 UTC; hannah
+Packaged: 2018-11-09 13:19:05 UTC; hannah
 Author: Hannah Meyer [aut, cre] (<https://orcid.org/0000-0003-4564-0899>)
 Repository: CRAN
-Date/Publication: 2018-11-06 12:20:03 UTC
+Date/Publication: 2018-11-09 14:20:02 UTC

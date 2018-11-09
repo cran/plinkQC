@@ -41,7 +41,7 @@ required files. User needs writing permission to qcdir.}
 
 \item{dont.check_sex}{[logical] If TRUE, no sex check will be conducted;
 short for do.run_check_sex=FALSE and do.evaluate_check_sex=FALSE.
-Takes precendence over do.run_check_sex and do.evaluate_check_sex.}
+Takes precedence over do.run_check_sex and do.evaluate_check_sex.}
 
 \item{do.run_check_sex}{[logical] If TRUE, run \code{\link{run_check_sex}}}
 
@@ -76,7 +76,7 @@ change the name.bim/.bed/.fam files!}
 \item{dont.check_het_and_miss}{[logical] If TRUE, no heterozygosity and
 missingness check will be conducted; short for
 do.run_check_heterozygosity=FALSE, do.run_check_missingness=FALSE and
-do.evaluate_check_het_and_miss=FALSE. Takes precendence over
+do.evaluate_check_het_and_miss=FALSE. Takes precedence over
 do.run_check_heterozygosity, do.run_check_missingness and
 do.evaluate_check_het_and_miss.}
 
@@ -87,17 +87,18 @@ do.evaluate_check_het_and_miss.}
 \item{do.evaluate_check_het_and_miss}{[logical] If TRUE, run
 \code{\link{evaluate_check_het_and_miss}}.}
 
-\item{imissTh}{[double] Threshold for acceptable missing genotype rate per
-individual.}
+\item{imissTh}{[double] Threshold for acceptable missing genotype rate in any
+individual; has to be proportion between (0,1)}
 
 \item{hetTh}{[double] Threshold for acceptable deviation from mean
 heterozygosity per individual. Expressed as multiples of standard
 deviation of heterozygosity (het), i.e. individuals outside mean(het) +/-
-hetTh*sd(het) will be returned as failing heterozygosity check.}
+hetTh*sd(het) will be returned as failing heterozygosity check; has to be
+larger than 0.}
 
 \item{dont.check_relatedness}{[logical] If TRUE, no relatedness check will be
 conducted; short for do.run_check_relatedness=FALSE and
-do.evaluate_check_relatedness=FALSE. Takes precendence over
+do.evaluate_check_relatedness=FALSE. Takes precedence over
 do.run_check_relatedness and do.evaluate_check_relatedness.}
 
 \item{do.run_check_relatedness}{[logical] If TRUE, run
@@ -111,7 +112,7 @@ pair of individuals.}
 
 \item{dont.check_ancestry}{[logical] If TRUE, no ancestry check will be
 conducted; short for do.run_check_ancestry=FALSE and
-do.evaluate_check_ancestry=FALSE. Takes precendence over
+do.evaluate_check_ancestry=FALSE. Takes precedence over
 do.run_check_ancestry and do.evaluate_check_ancestry.}
 
 \item{do.run_check_ancestry}{[logical] If TRUE, run
@@ -121,15 +122,15 @@ do.run_check_ancestry and do.evaluate_check_ancestry.}
 \code{\link{evaluate_check_ancestry}}.}
 
 \item{prefixMergedDataset}{[character] Prefix of merged dataset (study and
-reference samples) with prefixMergedDataset.bed, prefixMergedDataset.bim
-and prefixMergedDataset.fam, which was used in plink --pca, resulting in
-prefixMergedDataset.eigenvec}
+reference samples) used in plink --pca, resulting in
+prefixMergedDataset.eigenvec.}
 
 \item{europeanTh}{[double] Scaling factor of radius to be drawn around center
-of reference European samples, with study samples inside this radius
+of European reference samples, with study samples inside this radius
 considered to be of European descent and samples outside this radius of
-non-European descent. The radius is computed as the maximum Euclidean distance
-of reference Europeans to the centre of reference European samples.}
+non-European descent. The radius is computed as the maximum Euclidean
+distance of European reference samples to the centre of European reference
+samples.}
 
 \item{refSamples}{[data.frame] Dataframe with sample identifiers
 [refSamplesIID] corresponding to IIDs in prefixMergedDataset.eigenvec and
@@ -138,7 +139,7 @@ population identifier [refSamplesPop] corresponding to population IDs
 refSamplesFile have to be specified.}
 
 \item{refColors}{[data.frame, optional] Dataframe with population IDs in
-column [refColorsPop] and corresponding color-code for PCA plot in column
+column [refColorsPop] and corresponding colour-code for PCA plot in column
 [refColorsColor]. If not provided and is.null(refColorsFile) default colors
 are used.}
 
@@ -149,7 +150,7 @@ corresponding to population IDs [refColorsPop] in refColorsfile/refColors.}
 
 \item{refColorsFile}{[character, optional]
 /path/to/File/with/Population/Colors containing population IDs in column
-[refColorsPop] and corresponding color-code for PCA plot in column
+[refColorsPop] and corresponding colour-code for PCA plot in column
 [refColorsColor].If not provided and is.null(refColors) default colors for
 are used.}
 
@@ -165,7 +166,7 @@ refColors/refColorsFile}
 \item{refColorsPop}{[character] Column name of reference sample population
 IDs in refColors/refColorsFile.}
 
-\item{studyColor}{[character] Color to be used for study population.}
+\item{studyColor}{[character] Colour to be used for study population.}
 
 \item{interactive}{[logical] Should plots be shown interactively? When
 choosing this option, make sure you have X-forwarding/graphical interface
@@ -185,11 +186,12 @@ TRUE).}
 
 \item{verbose}{[logical] If TRUE, progress info is printed to standard out.}
 
-\item{path2plink}{[character] Absolute path to directory where external plink
-software \url{https://www.cog-genomics.org/plink/1.9/} can be found, i.e.
-plink should be accessible as path2plink/plink -h. If not
-provided, assumed that PATH set-up works and plink will be found by
-system("plink").}
+\item{path2plink}{[character] Absolute path to PLINK executable
+(\url{https://www.cog-genomics.org/plink/1.9/}) i.e.
+plink should be accesible as path2plink -h. The full name of the executable
+should be specified: for windows OS, this means path/plink.exe, for unix
+platforms this is path/plink. If not provided, assumed that PATH set-up works
+and PLINK will be found by \code{\link[sys]{exec_wait}}('plink').}
 
 \item{showPlinkOutput}{[logical] If TRUE, plink log and error messages are
 printed to standard out.}
