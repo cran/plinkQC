@@ -8,8 +8,7 @@ knitr::opts_chunk$set(
 ## ----set parameters------------------------------------------------------
 package.dir <- find.package('plinkQC')
 indir <- file.path(package.dir, 'extdata')
-#qcdir <- tempdir()
-qcdir <- indir
+qcdir <- tempdir()
 name <- 'data'
 path2plink <- "/Users/hannah/bin/plink"
 
