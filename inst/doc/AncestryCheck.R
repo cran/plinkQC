@@ -20,6 +20,6 @@ knitr::opts_chunk$set(
 #                                                  sep=""),
 #                              interactive=TRUE)
 
-## ----load ancestry, echo=FALSE, fig.align='center'-----------------------
+## ----load ancestry, out.width = "500px", echo=FALSE, fig.align='center'----
 knitr::include_graphics("checkAncestry.png")
 
