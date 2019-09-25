@@ -9,7 +9,8 @@ relatednessFilter(relatedness, otherCriterion = NULL, relatednessTh,
   "lt", "le", "eq"), relatednessIID1 = "IID1",
   relatednessIID2 = "IID2", relatednessFID1 = NULL,
   relatednessFID2 = NULL, relatednessRelatedness = "PI_HAT",
-  otherCriterionIID = "IID", otherCriterionMeasure = NULL)
+  otherCriterionIID = "IID", otherCriterionMeasure = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{relatedness}{[data.frame] containing pair-wise relatedness estimates
@@ -66,25 +67,34 @@ individual IDs.}
 
 \item{otherCriterionMeasure}{[character] Column name of the column containing
 the measure of the otherCriterion (for instance SNP missingness rate).}
+
+\item{verbose}{[logical] If TRUE, progress info is printed to standard out.}
 }
 \value{
 named [list] with i) relatednessFails, a [data.frame] containing the
-reordered input data.frame relatedness after filtering for pairs of
-individuals in relatednessIID1 and relatednessIID2, that fail the relatedness
-QC and ii) failIDs, a [data.frame] with the [IID]s (and [FID]s if provided)
-of the individuals that fail the relatednessTh.
+data.frame relatedness after filtering for pairs of individuals in
+relatednessIID1 and relatednessIID2, that fail the relatedness
+QC; the data.frame is reordered with the fail individuals in column 1 and
+their related individuals in column 2 and ii) failIDs, a [data.frame] with
+the [IID]s (and [FID]s if provided) of the individuals that fail the
+relatednessTh.
 }
 \description{
-\code{filterRelatedness} takes a data.frame with pair-wise relatedness
+\code{relatednessFilter} takes a data.frame with pair-wise relatedness
 measures of samples and returns pairs of individual IDs that are related as
 well as a list of suggested individual IDs to remove.
-\code{filterRelatedness} finds pairs of samples whose relatedness estimate is
-larger than the specified relatednessTh. Subsequently, for pairs of
+\code{relatednessFilter} finds pairs of samples whose relatedness estimate
+is larger than the specified relatednessTh. Subsequently, for pairs of
 individual that do not have additional relatives in the dataset, the
 individual with the worse otherCriterionMeasure (if provided) or arbitrarily
 individual 1 of that pair is selected and returned as the individual failing
 the relatedness check. For more complex family structures, the unrelated
-individuals per family are selected (e.g. in a parents-offspring trio, the
-offspring will be marked as fail, while the parents will be kept in the
-analysis).
+individuals per family are selected (e.g. in a simple case of a
+parents-offspring trio, the offspring will be marked as fail, while the
+parents will be kept in the analysis). Selection is achieved by constructing
+subgraphs of clusters of individuals that are related.
+\code{relatednessFilter} then finds the maximum independent set of vertices
+in the subgraphs of related individuals. If all individuals are related (i.e.
+all maximum independent sets are 0), one individual of that cluster will be
+kept and all others listed as failIDs.
 }

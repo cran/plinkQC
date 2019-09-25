@@ -101,8 +101,6 @@
 #' qcdir <- tempdir()
 #' name <- "data"
 #' # All quality control checks
-#' # In this examples, run_check* already conducted and outcome files present
-#' # in qcdir, hence dont.check_* all set to FALSE
 #' \dontrun{
 #' fail_individuals <- perIndividualQC(indir=indir, qcdir=qcdir, name=name,
 #' refSamplesFile=paste(qcdir, "/HapMap_ID2Pop.txt",sep=""),
@@ -114,8 +112,7 @@
 #' # Only check sex and missingness/heterozygosity
 #' fail_sex_het_miss <- perIndividualQC(indir=indir, qcdir=qcdir, name=name,
 #' dont.check_ancestry=TRUE, dont.check_relatedness=TRUE,
-#' interactive=FALSE, verbose=FALSE, do.run_check_het_and_miss=FALSE,
-#' do.run_check_sex=FALSE)
+#' interactive=FALSE, verbose=FALSE)
 #' }
 perIndividualQC <- function(indir, name, qcdir=indir,
                             dont.check_sex=FALSE,
@@ -132,6 +129,8 @@ perIndividualQC <- function(indir, name, qcdir=indir,
                             do.run_check_relatedness=TRUE,
                             do.evaluate_check_relatedness=TRUE,
                             highIBDTh=0.1875,
+                            mafThRelatedness=0.1,
+                            genomebuild='hg19',
                             dont.check_ancestry=FALSE,
                             do.run_check_ancestry=TRUE,
                             do.evaluate_check_ancestry=TRUE,
@@ -236,6 +235,8 @@ perIndividualQC <- function(indir, name, qcdir=indir,
         if (do.run_check_relatedness) {
             run <- run_check_relatedness(qcdir=qcdir, indir=indir, name=name,
                                          path2plink=path2plink,
+                                         mafThRelatedness=mafThRelatedness,
+                                         genomebuild=genomebuild,
                                          showPlinkOutput=showPlinkOutput,
                                          verbose=verbose)
         }
@@ -298,27 +299,32 @@ perIndividualQC <- function(indir, name, qcdir=indir,
         }
     }
 
-    if(!is.null(fail_het_imiss)) {
+    if(!is.null(fail_het_imiss$fail_imiss) &&
+       nrow(fail_het_imiss$fail_imiss) != 0) {
         missing_genotype <- select_(fail_het_imiss$fail_imiss, "FID", "IID")
         } else {
         missing_genotype <- NULL
     }
-    if(!is.null(fail_relatedness)) {
+    if(!is.null(fail_relatedness$failIDs) &&
+       nrow(fail_relatedness$failIDs) != 0) {
         highIBD <- select_(fail_relatedness$failIDs, "FID", "IID")
     } else {
         highIBD <- NULL
     }
-    if(!is.null(fail_het_imiss)) {
+    if(!is.null(fail_het_imiss$fail_het) &&
+       nrow(fail_het_imiss$fail_het) != 0) {
         outlying_heterozygosity <- select_(fail_het_imiss$fail_het, "FID", "IID")
     } else {
         outlying_heterozygosity <- NULL
     }
-    if(!is.null(fail_sex)) {
+    if(!is.null(fail_sex$fail_sex) &&
+       nrow(fail_sex$fail_sex) != 0) {
         mismatched_sex<- select_(fail_sex$fail_sex, "FID", "IID")
     } else {
         mismatched_sex <- NULL
     }
-    if(!is.null(fail_ancestry)) {
+    if(!is.null(fail_ancestry$fail_ancestry) &&
+       nrow(fail_ancestry$fail_ancestry) != 0) {
         ancestry <- select_(fail_ancestry$fail_ancestry, "FID", "IID")
     } else {
         ancestry <- NULL
@@ -384,12 +390,14 @@ perIndividualQC <- function(indir, name, qcdir=indir,
 #' other_arguments) or pdf(outfile) print(p_overview) dev.off().
 #' @return Named [list] with i) nr_fail_samples: total number of samples
 #' [integer] failing perIndividualQC, ii) fail_QC containing a [data.frame] with
-#' samples that failed QC steps (excluding ancestry): samples IIDs in rows,
-#' columns are all QC steps applied by perIndividualQC (max=4), with entries=0
+#' samples that failed QC steps (excluding ancestry) with IID, FID,
+#' all QC steps applied by perIndividualQC (max=4), with entries=0
 #' if passing the QC and entries=1 if failing that particular QC and iii)
 #' fail_QC_and_ancestry containing a [data.frame] with samples that failed
-#' ancestry and QC checks: samples IIDs in rows, columns are QC_fail and
-#' Ancestry_fail, with entries=0 if passing and entries=1 if failing that check.
+#' ancestry and QC checks with IID, FID, QC_fail and
+#' Ancestry_fail, with entries=0 if passing and entries=1 if failing that check,
+#' iii) p_overview, a ggplot2-object 'containing' a sub-paneled plot with the
+#' QC-plots.
 #' @export
 #' @examples
 #' indir <- system.file("extdata", package="plinkQC")
@@ -408,81 +416,80 @@ perIndividualQC <- function(indir, name, qcdir=indir,
 
 overviewPerIndividualQC <- function(results_perIndividualQC,
                                     interactive=FALSE) {
-    list2counts <- function(element, all_names) {
-        all_names[!(all_names %in% element)] <- 0
-        all_names[all_names %in% element] <- 1
-        return(as.numeric(all_names))
-    }
     if (length(perIndividualQC) == 2 &&
         !all(names(results_perIndividualQC) == c("fail_list", "p_sampleQC"))) {
         stop("results_perIndividualQC not direct output of perIndividualQC")
     }
     fail_list <- results_perIndividualQC$fail_list
-    # Remove null elements
-    fail_list <- fail_list[!sapply(fail_list, is.null)]
-
-    unique_samples_fail_all <- unique(unlist(fail_list))
+    samples_fail_all <- do.call(rbind, fail_list)
 
     # a) overview QC fails independent of ethnicity
     fail_list_wo_ancestry <- fail_list[!names(fail_list) == "ancestry"]
-    unique_samples_fail_wo_ancestry <- unique(unlist(fail_list_wo_ancestry))
-
-    fail_counts_wo_ancestry <- sapply(fail_list_wo_ancestry, list2counts,
-                                      unique_samples_fail_wo_ancestry)
+    id_list_wo_ancestry <- sapply(fail_list_wo_ancestry, function(x) x$IID)
+    unique_samples_fail_wo_ancestry <- unique(unlist(id_list_wo_ancestry))
+    fail_counts_wo_ancestry <- UpSetR::fromList(id_list_wo_ancestry)
     rownames(fail_counts_wo_ancestry) <- unique_samples_fail_wo_ancestry
 
+    p <- UpSetR::upset(fail_counts_wo_ancestry,
+                       order.by = "freq",
+                       empty.intersections = "on", text.scale=1.2,
+                       # Include when UpSetR v1.4.1 is released
+                       #title="Overview quality control failures",
+                       mainbar.y.label="Samples failing multiple QC checks",
+                       sets.x.label="Sample fails per QC check",
+                       main.bar.color="#1b9e77", matrix.color="#1b9e77",
+                       sets.bar.color="#d95f02")
+    p_qc <- cowplot::plot_grid(NULL, p$Main_bar, p$Sizes, p$Matrix,
+                               nrow=2, align='v', rel_heights = c(3,1),
+                               rel_widths = c(2,3))
     if (interactive) {
-        if (length(fail_list_wo_ancestry) >= 2) {
-            UpSetR::upset(UpSetR::fromList(fail_list_wo_ancestry),
-                  order.by = "freq",
-                  empty.intersections = "on", text.scale=1.2,
-                  # Include when UpSetR v1.4.1 is released
-                  # title="Overview quality control failures",
-                  mainbar.y.label="Samples failing multiple QC checks",
-                  sets.x.label="Sample fails per QC check",
-                  main.bar.color="#1b9e77", matrix.color="#1b9e77",
-                  sets.bar.color="#d95f02")
-        } else {
-            message("overviewSampleQC for QC fails cannot be displayed with ",
-                    "UpSetR: at least two elements in list required, but only ",
-                    length(fail_list_wo_ancestry) ," provided")
-        }
+        print(p_qc)
     }
 
-    if ("ancestry" %in% names(fail_list)) {
+    fail_counts_wo_ancestry <- merge(samples_fail_all, fail_counts_wo_ancestry,
+                                     by.x=2, by.y=0)
+    if ("ancestry" %in% names(fail_list) && !is.null(fail_list$ancestry)) {
         # b) overview of QC and ancestry fails
         fail_all <- list(QC_fail=unique_samples_fail_wo_ancestry,
-                    Ancestry_fail=fail_list$ancestry)
-        fail_counts_all <- sapply(fail_all, list2counts,
-                                  unique_samples_fail_all)
+                    Ancestry_fail=fail_list$ancestry$IID)
+
+        unique_samples_fail_all <- unique(unlist(fail_all))
+        fail_counts_all <- UpSetR::fromList(fail_all)
         rownames(fail_counts_all) <- unique_samples_fail_all
-        if (interactive) {
-            if (length(fail_all) >= 2) {
-                UpSetR::upset(UpSetR::fromList(fail_all),
-                              order.by = "freq",
-                            # Include when UpSetR v1.4.1 is released
-                      # title="Intersection between QC and ancestry failures",
-                      mainbar.y.label="Samples failing QC and ancestry checks",
-                      sets.x.label="Sample fails per QC check",
+
+        m <- UpSetR::upset(fail_counts_all,
+                      order.by = "freq",
+                      # Include when UpSetR v1.4.1 is released
+                      # title=
+                      # "Intersection between QC and ancestry failures",
+                      mainbar.y.label=
+                          "Samples failing QC and ancestry checks",
+                                  sets.x.label="Sample fails per QC check",
                       empty.intersections = "on", text.scale=1.2,
                       main.bar.color="#7570b3", matrix.color="#7570b3",
-                    sets.bar.color="#e7298a" )
-            } else {
-                message("overviewSampleQC for QC fails and ancestry cannot be ",
-                        "displayed with UpSetR: as no samples are present in ",
-                        "QC fails")
-            }
+                      sets.bar.color="#e7298a" )
+        p_all <- cowplot::plot_grid(NULL, m$Main_bar, m$Sizes, m$Matrix,
+                                   nrow=2, align='v', rel_heights = c(3,1),
+                                   rel_widths = c(2,3))
+        if (interactive) {
+            print(p_all)
         }
-        #p_overview <- cowplot::plot_grid(p_qc, p_qc_ancestry, nrow=2)
+        fail_counts_all <- merge(samples_fail_all, fail_counts_all,
+                                         by.x=2, by.y=0)
+
+        p_overview <- cowplot::plot_grid(NULL, p$Main_bar, p$Sizes, p$Matrix,
+                                         NULL, m$Main_bar, m$Sizes, m$Matrix,
+                                   nrow=4, align='v', rel_heights = c(3,1,3,1),
+                                   rel_widths = c(2,3))
     } else {
-        #p_overview <- p_qc
+        p_overview <- p_qc
         fail_counts_all <- NULL
     }
-    nr_fail_samples <- length(unique_samples_fail_all)
+    nr_fail_samples <- length(unique(samples_fail_all$IID))
     return(list(nr_fail_samples=nr_fail_samples,
                 fail_QC=fail_counts_wo_ancestry,
-                fail_QC_and_ancestry=fail_counts_all))
-                #p_overview=p_overview))
+                fail_QC_and_ancestry=fail_counts_all,
+                p_overview=p_overview))
 }
 
 #' Identification of individuals with discordant sex information
@@ -547,6 +554,7 @@ overviewPerIndividualQC <- function(results_perIndividualQC,
 #' save the returned plot object (p_sexcheck) via ggplot2::ggsave(p=p_sexcheck,
 #' other_arguments) or pdf(outfile) print(p_sexcheck) dev.off().
 #' @inheritParams checkPlink
+#' @inheritParams run_check_sex
 #' @inheritParams evaluate_check_sex
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
 #' printed to standard out.
@@ -652,7 +660,9 @@ check_sex <- function(indir, name, qcdir=indir, maleTh=0.8, femaleTh=0.2,
 #' hetTh*sd(het) will be returned as failing heterozygosity check; has to be
 #' larger than 0.
 #' @inheritParams checkPlink
-#' @inheritParams evaluate_check_sex
+#' @inheritParams evaluate_check_het_and_miss
+#' @inheritParams run_check_heterozygosity
+#' @inheritParams run_check_missingness
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
 #' printed to standard out.
 #' @param interactive [logical] Should plots be shown interactively? When
@@ -751,6 +761,9 @@ check_het_and_miss <- function(indir, name, qcdir=indir, imissTh=0.03, hetTh=3,
 #' @param imissTh [double] Threshold for acceptable missing genotype rate in any
 #' individual; has to be proportion between (0,1)
 #' @inheritParams checkPlink
+#' @inheritParams run_check_relatedness
+#' @inheritParams evaluate_check_relatedness
+#' @inheritParams checkPlink
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
 #' printed to standard out.
 #' @param interactive [logical] Should plots be shown interactively? When
@@ -784,12 +797,15 @@ check_het_and_miss <- function(indir, name, qcdir=indir, imissTh=0.03, hetTh=3,
 #' run.check_relatedness=FALSE)
 #' }
 check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.1875,
-                              imissTh=0.03, run.check_relatedness=TRUE,
+                              genomebuild='hg19', imissTh=0.03,
+                              run.check_relatedness=TRUE,
                               interactive=FALSE, verbose=FALSE,
-                              path2plink=NULL, showPlinkOutput=TRUE) {
+                              mafThRelatedness=0.1, path2plink=NULL,
+                              showPlinkOutput=TRUE) {
     if (run.check_relatedness) {
         run <- run_check_relatedness(indir=indir, qcdir=qcdir, name=name,
                                      verbose=verbose,
+                                     mafThRelatedness=mafThRelatedness,
                                      path2plink=path2plink,
                                      highIBDTh=highIBDTh,
                                      showPlinkOutput=showPlinkOutput)
@@ -876,6 +892,8 @@ check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.1875,
 #' save the returned plot object (p_ancestry) via ggplot2::ggsave(p=p_ancestry,
 #' other_arguments) or pdf(outfile) print(p_ancestry) dev.off().
 #' @inheritParams checkPlink
+#' @inheritParams run_check_ancestry
+#' @inheritParams evaluate_check_ancestry
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
 #' printed to standard out.
 #' @param verbose [logical] If TRUE, progress info is printed to standard out.
@@ -1383,7 +1401,7 @@ evaluate_check_het_and_miss <- function(qcdir, name, imissTh=0.03,
     fail_imiss <- imiss[imiss$F_MISS > imissTh,]
 
     names_het <- c("FID", "IID", "O.HOM.", "E.HOM.", "N.NM.", "F")
-    het <- read.table(paste(prefix, ".het", sep=""), header=TRUE)
+    het <- read.table(paste(prefix, ".het", sep=""), header=TRUE, as.is=TRUE)
     if (!all(names_het == names(het))) {
         stop("Header of ", prefix, ".het is not correct. Was your
              file generated with plink --het?")
@@ -1444,12 +1462,12 @@ evaluate_check_het_and_miss <- function(qcdir, name, imissTh=0.03,
 #' Run LD pruning on dataset with plink --exclude range highldfile
 #' --indep-pairwise 50 5 0.2, where highldfile contains regions of high LD as
 #' provided by Anderson et (2010) Nature Protocols. Subsequently, plink
-#' --genome is run on the LD pruned data. plink --genome calculates identity
-#' by state (IBS) for each pair of individuals based on the average proportion
-#' of alleles shared at genotyped SNPs. The degree of recent shared ancestry,
-#' i.e. the identity by descent (IBD) can be estimated from the genome-wide IBS.
-#' The proportion of IBD between two individuals is returned by --genome as
-#' PI_HAT.
+#' --genome is run on the LD pruned, maf-filtered data. plink --genome
+#' calculates identity by state (IBS) for each pair of individuals based on the
+#' average proportion of alleles shared at genotyped SNPs. The degree of recent
+#' shared ancestry,i.e. the identity by descent (IBD) can be estimated from the
+#' genome-wide IBS. The proportion of IBD between two individuals is returned by
+#' --genome as PI_HAT.
 #'
 #' Both \code{\link{run_check_relatedness}} and its evaluation via
 #' \code{\link{evaluate_check_relatedness}} can simply be invoked by
@@ -1465,10 +1483,27 @@ evaluate_check_het_and_miss <- function(qcdir, name, imissTh=0.03,
 #' @param highIBDTh [double] Threshold for acceptable proportion of IBD between
 #' pair of individuals; only pairwise relationship estimates larger than this
 #' threshold will be recorded.
+#' @param mafThRelatedness [double] Threshold of minor allele frequency filter
+#' for selecting variants for IBD estimation.
+#' @param genomebuild [character] Name of the genome build of the PLINK file
+#' annotations, ie mappings in the name.bim file. Will be used to remove
+#' high-LD regions based on the coordinates of the respective build. Options
+#' are hg18, hg19 and hg38. See @details.
 #' @inheritParams checkPlink
 #' @param showPlinkOutput [logical] If TRUE, plink log and error messages are
 #' printed to standard out.
 #' @param verbose [logical] If TRUE, progress info is printed to standard out.
+#' @details The IBD estimation is conducted on LD pruned data and in a first
+#' step, high LD regions are excluded. The regions were derived from the
+#' high-LD-regions file provided by Anderson et (2010) Nature Protocols. These
+#' regions are in NCBI36 (hg18) coordinates and were lifted to GRCh37 (hg19)
+#' and GRC38 (hg38) coordinates using the liftOver tool available here:
+#' \url{https://genome.ucsc.edu/cgi-bin/hgLiftOver}. The 'Minimum ratio of bases
+#' that must remap' which was set to 0.5 and the 'Allow multiple output regions'
+#' box ticked; for all other parameters, the default options were selected.
+#' LiftOver files were generated on July 9,2019. The commands for formatting
+#' the files are provided in system.file("extdata", 'liftOver.cmd',
+#' package="plinkQC").
 #' @export
 #' @examples
 #' indir <- system.file("extdata", package="plinkQC")
@@ -1480,7 +1515,8 @@ evaluate_check_het_and_miss <- function(qcdir, name, imissTh=0.03,
 #' run <- run_check_relatedness(indir=indir, qcdir=qcdir, name=name)
 #' }
 run_check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.185,
-                                  path2plink=NULL,
+                                  mafThRelatedness=0.1,
+                                  path2plink=NULL, genomebuild='hg19',
                                   showPlinkOutput=TRUE, verbose=FALSE) {
 
     prefix <- makepath(indir, name)
@@ -1489,8 +1525,24 @@ run_check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.185,
     checkFormat(prefix)
     path2plink <- checkPlink(path2plink)
 
-    highld <- system.file("extdata", 'high-LD-regions.txt', package="plinkQC")
+    if (tolower(genomebuild) == 'hg18' || tolower(genomebuild) == 'NCBI36') {
+        highld <- system.file("extdata", 'high-LD-regions-hg18-NCBI36.txt',
+                               package="plinkQC")
+    } else if (tolower(genomebuild) == 'hg19' ||
+               tolower(genomebuild) == 'grch37') {
+        highld <- system.file("extdata", 'high-LD-regions-hg19-GRCh37.txt',
+                              package="plinkQC")
+    } else if (tolower(genomebuild) == 'hg38' ||
+               tolower(genomebuild) == 'grch38') {
+        highld <- system.file("extdata", 'high-LD-regions-hg38-GRCh38.txt',
+                              package="plinkQC")
+    } else {
+        stop(genomebuild, "is not a known/provided human genome build.",
+             "Options are: hg18, hg19, and hg38")
+    }
 
+    if (verbose) message(paste("Use", genomebuild, "coordinates for pruning of",
+                               "high-ld regions"))
     if (verbose) message(paste("Prune", prefix, "for relatedness estimation"))
     sys::exec_wait(path2plink,
                    args=c("--bfile", prefix, "--exclude", "range", highld,
@@ -1498,10 +1550,15 @@ run_check_relatedness <- function(indir, name, qcdir=indir, highIBDTh=0.185,
                 std_out=showPlinkOutput, std_err=showPlinkOutput)
 
     if (verbose) message("Run check_relatedness via plink --genome")
+    if (!is.null(mafThRelatedness)) {
+        maf <- c("--maf", mafThRelatedness)
+    } else {
+        maf <- NULL
+    }
     sys::exec_wait(path2plink,
                    args=c("--bfile", prefix, "--extract",
                           paste(out, ".prune.in", sep=""),
-                          "--maf", 0.1, "--genome", "--min", highIBDTh,
+                          maf, "--genome", "--min", highIBDTh,
                           "--out", out),
                  std_out=showPlinkOutput, std_err=showPlinkOutput)
     if (!file.exists(paste(prefix, ".imiss", sep=""))) {
@@ -1595,7 +1652,7 @@ evaluate_check_relatedness <- function(qcdir, name, highIBDTh=0.1875,
     testNumerics(numbers=highIBDTh, positives=highIBDTh, proportions=highIBDTh)
     names_imiss <- c("FID", "IID", "MISS_PHENO", "N_MISS", "N_GENO", "F_MISS")
     imiss <- read.table(paste(prefix, ".imiss", sep=""), header=TRUE,
-                        as.is=TRUE)
+                        as.is=TRUE, stringsAsFactors=FALSE)
     if (!all(names_imiss == names(imiss))) {
         stop("Header of ", prefix, ".imiss is not correct. Was your
              file generated with plink --imiss?")
@@ -1603,7 +1660,7 @@ evaluate_check_relatedness <- function(qcdir, name, highIBDTh=0.1875,
     names_genome <- c("FID1", "IID1", "FID2", "IID2", "RT", "EZ", "Z0", "Z1",
                       "Z2", "PI_HAT", "PHE", "DST", "PPC", "RATIO")
     genome <- read.table(paste(prefix, ".genome", sep=""), header=TRUE,
-                         as.is=TRUE)
+                         as.is=TRUE, stringsAsFactors=FALSE)
     if (!all(names_genome == names(genome))) {
         stop("Header of ", prefix, ".genome is not correct. Was your
              file generated with plink --genome?")
@@ -1804,6 +1861,8 @@ evaluate_check_ancestry <- function(indir, name, prefixMergedDataset,
                                  header=FALSE, stringsAsFactors=FALSE,
                                  data.table=FALSE)[,1:2]
     colnames(samples) <- c("FID", "IID")
+    #samples$IID <- as.character(samples$IID)
+    #samples$FID <- as.character(samples$FID)
     if (!file.exists(paste(out, ".eigenvec", sep=""))){
         stop("plink --pca output file: ", out, ".eigenvec does not exist.")
     }
@@ -1812,6 +1871,8 @@ evaluate_check_ancestry <- function(indir, name, prefixMergedDataset,
                                   stringsAsFactors=FALSE, data.table=FALSE)
     colnames(pca_data) <- c("FID", "IID", paste("PC",1:(ncol(pca_data)-2),
                                                 sep=""))
+    #pca_data$IID <- as.character(pca_data$IID)
+    #pca_data$FID <- as.character(pca_data$FID)
 
     if (is.null(refSamples) && is.null(refSamplesFile)) {
         stop("Neither refSamples nor refSamplesFile are specified")

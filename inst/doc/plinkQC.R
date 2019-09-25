@@ -38,7 +38,6 @@ knitr::include_graphics("individualQC.png")
 ## ----load overviewIndividualQC, out.width = "500px", echo=FALSE----------
 par(mfrow=c(2,1), las=1)
 knitr::include_graphics("overviewQC.png")
-knitr::include_graphics("overviewAncestryQC.png")
 
 ## ----marker QC, eval=FALSE-----------------------------------------------
 #  fail_markers <- perMarkerQC(indir=indir, qcdir=qcdir, name=name,
