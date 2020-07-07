@@ -4,11 +4,25 @@
 \alias{check_sex}
 \title{Identification of individuals with discordant sex information}
 \usage{
-check_sex(indir, name, qcdir = indir, maleTh = 0.8, femaleTh = 0.2,
-  run.check_sex = TRUE, externalSex = NULL, externalFemale = "F",
-  externalMale = "M", externalSexSex = "Sex", externalSexID = "IID",
-  fixMixup = FALSE, interactive = FALSE, verbose = FALSE,
-  label = TRUE, path2plink = NULL, showPlinkOutput = TRUE)
+check_sex(
+  indir,
+  name,
+  qcdir = indir,
+  maleTh = 0.8,
+  femaleTh = 0.2,
+  run.check_sex = TRUE,
+  externalSex = NULL,
+  externalFemale = "F",
+  externalMale = "M",
+  externalSexSex = "Sex",
+  externalSexID = "IID",
+  fixMixup = FALSE,
+  interactive = FALSE,
+  verbose = FALSE,
+  label = TRUE,
+  path2plink = NULL,
+  showPlinkOutput = TRUE
+)
 }
 \arguments{
 \item{indir}{[character] /path/to/directory containing the basic PLINK data
@@ -68,7 +82,7 @@ plot.}
 plink should be accesible as path2plink -h. The full name of the executable
 should be specified: for windows OS, this means path/plink.exe, for unix
 platforms this is path/plink. If not provided, assumed that PATH set-up works
-and PLINK will be found by \code{\link[sys]{exec_wait}}('plink').}
+and PLINK will be found by \code{\link[sys]{exec}}('plink').}
 
 \item{showPlinkOutput}{[logical] If TRUE, plink log and error messages are
 printed to standard out.}

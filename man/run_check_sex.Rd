@@ -4,8 +4,14 @@
 \alias{run_check_sex}
 \title{Run PLINK sexcheck}
 \usage{
-run_check_sex(indir, name, qcdir = indir, verbose = FALSE,
-  path2plink = NULL, showPlinkOutput = TRUE)
+run_check_sex(
+  indir,
+  name,
+  qcdir = indir,
+  verbose = FALSE,
+  path2plink = NULL,
+  showPlinkOutput = TRUE
+)
 }
 \arguments{
 \item{indir}{[character] /path/to/directory containing the basic PLINK data
@@ -25,7 +31,7 @@ qcdir=indir.}
 plink should be accesible as path2plink -h. The full name of the executable
 should be specified: for windows OS, this means path/plink.exe, for unix
 platforms this is path/plink. If not provided, assumed that PATH set-up works
-and PLINK will be found by \code{\link[sys]{exec_wait}}('plink').}
+and PLINK will be found by \code{\link[sys]{exec}}('plink').}
 
 \item{showPlinkOutput}{[logical] If TRUE, plink log and error messages are
 printed to standard out.}

@@ -5,9 +5,16 @@
 \title{Identification of SNPs showing a significant deviation from Hardy-Weinberg-
 equilibrium (HWE)}
 \usage{
-check_hwe(indir, name, qcdir = indir, hweTh = 1e-05,
-  interactive = FALSE, path2plink = NULL, verbose = FALSE,
-  showPlinkOutput = TRUE)
+check_hwe(
+  indir,
+  name,
+  qcdir = indir,
+  hweTh = 1e-05,
+  interactive = FALSE,
+  path2plink = NULL,
+  verbose = FALSE,
+  showPlinkOutput = TRUE
+)
 }
 \arguments{
 \item{indir}{[character] /path/to/directory containing the basic PLINK data
@@ -35,7 +42,7 @@ other_arguments) or pdf(outfile) print(p_hwe) dev.off().}
 plink should be accesible as path2plink -h. The full name of the executable
 should be specified: for windows OS, this means path/plink.exe, for unix
 platforms this is path/plink. If not provided, assumed that PATH set-up works
-and PLINK will be found by \code{\link[sys]{exec_wait}}('plink').}
+and PLINK will be found by \code{\link[sys]{exec}}('plink').}
 
 \item{verbose}{[logical] If TRUE, progress info is printed to standard out
 and specifically, if TRUE, plink log will be displayed.}

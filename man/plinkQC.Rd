@@ -3,9 +3,8 @@
 \docType{package}
 \name{plinkQC}
 \alias{plinkQC}
-\alias{plinkQC-package}
 \title{plinkQC}
 \description{
-plinkQC
+Genotype Quality Control with 'PLINK'
 }
 \keyword{internal}

@@ -4,12 +4,26 @@
 \alias{cleanData}
 \title{Create plink dataset with individuals and markers passing quality control}
 \usage{
-cleanData(indir, name, qcdir = indir, filterSex = TRUE,
-  filterHeterozygosity = TRUE, filterSampleMissingness = TRUE,
-  filterAncestry = TRUE, filterRelated = TRUE,
-  filterSNPMissingness = TRUE, lmissTh = 0.01, filterHWE = TRUE,
-  hweTh = 1e-05, filterMAF = TRUE, macTh = 20, mafTh = NULL,
-  path2plink = NULL, verbose = FALSE, showPlinkOutput = TRUE)
+cleanData(
+  indir,
+  name,
+  qcdir = indir,
+  filterSex = TRUE,
+  filterHeterozygosity = TRUE,
+  filterSampleMissingness = TRUE,
+  filterAncestry = TRUE,
+  filterRelated = TRUE,
+  filterSNPMissingness = TRUE,
+  lmissTh = 0.01,
+  filterHWE = TRUE,
+  hweTh = 1e-05,
+  filterMAF = TRUE,
+  macTh = 20,
+  mafTh = NULL,
+  path2plink = NULL,
+  verbose = FALSE,
+  showPlinkOutput = TRUE
+)
 }
 \arguments{
 \item{indir}{[character] /path/to/directory containing the basic PLINK data
@@ -81,7 +95,7 @@ and macTh are specified, macTh is used (macTh = mafTh\*2\*NrSamples).}
 plink should be accesible as path2plink -h. The full name of the executable
 should be specified: for windows OS, this means path/plink.exe, for unix
 platforms this is path/plink. If not provided, assumed that PATH set-up works
-and PLINK will be found by \code{\link[sys]{exec_wait}}('plink').}
+and PLINK will be found by \code{\link[sys]{exec}}('plink').}
 
 \item{verbose}{[logical] If TRUE, progress info is printed to standard out.}
 
