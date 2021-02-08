@@ -48,6 +48,7 @@
 #' \code{\link{check_snp_missingness}} or \code{\link{perMarkerQC}}). Requires
 #' lmissTh to be set.
 #' @inheritParams checkPlink
+#' @inheritParams checkFiltering
 #' @inheritParams check_maf
 #' @inheritParams check_hwe
 #' @inheritParams check_snp_missingness
@@ -68,19 +69,42 @@
 #' # the following code is not run on package build, as the path2plink on the
 #' # user system is not known.
 #' \dontrun{
-#' # Run individual QC checks
+#' # Run qc on all samples and markers in the dataset
+#' ## Run individual QC checks
 #' fail_individuals <- perIndividualQC(indir=indir, qcdir=qcdir, name=name,
 #' refSamplesFile=paste(qcdir, "/HapMap_ID2Pop.txt",sep=""),
 #' refColorsFile=paste(qcdir, "/HapMap_PopColors.txt", sep=""),
-#' prefixMergedDataset="data.HapMapIII", interactive=FALSE, verbose=FALSE)
+#' prefixMergedDataset="data.HapMapIII", interactive=FALSE, verbose=FALSE,
+#' path2plink=path2plink)
 #'
-#' # Run marker QC checks
-#' fail_markers <- perMarkerQC(indir=indir, qcdir=qcdir, name=name)
+#' ## Run marker QC checks
+#' fail_markers <- perMarkerQC(indir=indir, qcdir=qcdir, name=name,
+#' path2plink=path2plink)
 #'
-#' # Create new dataset of indiviudals and markers passing QC
+#' ## Create new dataset of individuals and markers passing QC
 #' ids_all <- cleanData(indir=indir, qcdir=qcdir, name=name, macTh=15,
 #' verbose=TRUE, path2plink=path2plink, filterAncestry=FALSE,
 #' filterRelated=TRUE)
+#'
+#' # Run qc on subset of samples and markers in the dataset
+#' highlight_samples <- read.table(system.file("extdata", "keep_individuals",
+#' package="plinkQC"))
+#' remove_individuals_file <- system.file("extdata", "remove_individuals",
+#' package="plinkQC")
+#'
+#' fail_individuals <- perIndividualQC(indir=indir, qcdir=qcdir, name=name,
+#' dont.check_ancestry = TRUE, interactive=FALSE, verbose=FALSE,
+#' highlight_samples = highlight_samples[,2], highlight_type = "label",
+#' remove_individuals = remove_individuals_file, path2plink=path2plink)
+#'
+#' ## Run marker QC checks
+#' fail_markers <- perMarkerQC(indir=indir, qcdir=qcdir, name=name,
+#' path2plink=path2plink)
+#'
+#' ## Create new dataset of individuals and markers passing QC
+#' ids_all <- cleanData(indir=indir, qcdir=qcdir, name=name, macTh=15,
+#' verbose=TRUE, path2plink=path2plink, filterAncestry=FALSE,
+#' remove_individuals = remove_individuals_file)
 #' }
 
 cleanData <- function(indir, name, qcdir=indir,
@@ -91,6 +115,10 @@ cleanData <- function(indir, name, qcdir=indir,
                       filterHWE=TRUE, hweTh=1e-5,
                       filterMAF=TRUE, macTh=20, mafTh=NULL,
                       path2plink=NULL, verbose=FALSE,
+                      keep_individuals=NULL,
+                      remove_individuals=NULL,
+                      exclude_markers=NULL,
+                      extract_markers=NULL,
                       showPlinkOutput=TRUE) {
     sampleFilter <- c(filterAncestry, filterRelated, filterSex,
                       filterHeterozygosity, filterSampleMissingness)
@@ -112,48 +140,64 @@ cleanData <- function(indir, name, qcdir=indir,
     }
     checkFormat(prefix)
     path2plink <- checkPlink(path2plink)
+    args_filter <- checkFiltering(extract_markers=extract_markers,
+                                  exclude_markers=exclude_markers)
+    removeIDs <- checkRemoveIDs(prefix=prefix,
+                                remove_individuals=remove_individuals,
+                                keep_individuals=keep_individuals)
+    allIDs <- data.table::fread(paste(prefix, ".fam", sep=""),
+                                data.table=FALSE, stringsAsFactors=FALSE,
+                                header=FALSE)
+    allIDs <- allIDs[,1:2]
 
-    # Remove remove.IDs file if already existing
-    removeIDs <- NULL
-    IDs <- data.table::fread(paste(prefix, ".fam", sep=""),
-                                   data.table=FALSE, stringsAsFactors=FALSE,
-                                   header=FALSE)
     if (any(sampleFilter)) {
         if (filterRelated) {
-            if (!file.exists(paste(out, ".fail-IBD.IDs", sep=""))){
+            fail_ibd_ids <- paste0(out, ".fail-IBD.IDs")
+            if (!file.exists(fail_ibd_ids)){
                 stop("filterRelated is TRUE but file ", out,
                      ".fail-IBD.IDs does not exist")
             } else {
                 if (verbose) {
                     message("Read individual IDs that failed relatedness check")
                 }
-                removeIDs <- rbind(removeIDs,
-                                   data.table::fread(paste(out, ".fail-IBD.IDs",
-                                                     sep=""),
-                                                     data.table=FALSE,
-                                                     stringsAsFactors=FALSE,
-                                                     header=FALSE))
+                if (file.size(fail_ibd_ids) == 0) {
+                    if (verbose) {
+                        message("No individuals failed relatedness check")
+                    }
+                } else {
+                    removeIDs <- rbind(removeIDs,
+                                       data.table::fread(fail_ibd_ids,
+                                                         data.table=FALSE,
+                                                         stringsAsFactors=FALSE,
+                                                         header=FALSE))
+                }
             }
         }
         if (filterAncestry) {
-            if (!file.exists(paste(out, ".fail-ancestry.IDs", sep=""))){
+            fail_ancestry_ids <- paste0(out, ".fail-ancestry.IDs")
+            if (!file.exists(fail_ancestry_ids)){
                 stop("filterAncestry is TRUE but file ", out,
                      ".fail-ancestry.IDs does not exist")
             } else {
                 if (verbose) {
                     message("Read individual IDs that failed ancestry check")
                 }
-                removeIDs <- rbind(removeIDs,
-                                   data.table::fread(paste(out,
-                                                           ".fail-ancestry.IDs",
-                                                           sep=""),
-                                                     data.table=FALSE,
-                                                     stringsAsFactors=FALSE,
-                                                     header=FALSE))
+                if (file.size(fail_ancestry_ids) == 0) {
+                    if (verbose) {
+                        message("No individuals failed ancestry check")
+                    }
+                } else {
+                    removeIDs <- rbind(removeIDs,
+                                       data.table::fread(fail_ancestry_ids,
+                                                         data.table=FALSE,
+                                                         stringsAsFactors=FALSE,
+                                                         header=FALSE))
+                }
             }
         }
         if (filterHeterozygosity) {
-            if (!file.exists(paste(out, ".fail-het.IDs", sep=""))){
+            fail_het_ids <- paste0(out, ".fail-het.IDs")
+            if (!file.exists(fail_het_ids)){
                 stop("filterHeterozygosity is TRUE but file ", out,
                      ".fail-het.IDs does not exist")
             } else {
@@ -161,66 +205,80 @@ cleanData <- function(indir, name, qcdir=indir,
                     message("Read individual IDs that failed heterozygosity ",
                             "check")
                 }
-                removeIDs <- rbind(removeIDs,
-                                   data.table::fread(paste(out, ".fail-het.IDs",
-                                                           sep=""),
-                                                     data.table=FALSE,
-                                                     stringsAsFactors=FALSE,
-                                                     header=FALSE))
+                if (file.size(fail_het_ids) == 0) {
+                    if (verbose) {
+                        message("No individuals failed heterozygosity check")
+                    }
+                } else {
+                    removeIDs <- rbind(removeIDs,
+                                       data.table::fread(fail_het_ids,
+                                                         data.table=FALSE,
+                                                         stringsAsFactors=FALSE,
+                                                         header=FALSE))
+                }
             }
         }
         if (filterSampleMissingness) {
-            if (!file.exists(paste(out, ".fail-imiss.IDs", sep=""))){
+            fail_imiss_ids <- paste0(out, ".fail-imiss.IDs")
+            if (!file.exists(fail_imiss_ids)){
                 stop("filterSampleMissingness is TRUE but file ", out,
                      ".fail-imiss.IDs does not exist")
             } else {
                 if (verbose) {
                     message("Read individual IDs that failed missingness check")
                 }
-                removeIDs <- rbind(removeIDs,
-                                   data.table::fread(paste(out,
-                                                           ".fail-imiss.IDs",
-                                                           sep=""),
-                                                     data.table=FALSE,
-                                                     stringsAsFactors=FALSE,
-                                                     header=FALSE))
+                if (file.size(fail_imiss_ids) == 0) {
+                    if (verbose) {
+                        message("No individuals failed missingness check")
+                    }
+                } else {
+                    removeIDs <- rbind(removeIDs,
+                                       data.table::fread(fail_imiss_ids,
+                                                         data.table=FALSE,
+                                                         stringsAsFactors=FALSE,
+                                                         header=FALSE))
+                }
             }
         }
         if (filterSex) {
-            if (!file.exists(paste(out, ".fail-sexcheck.IDs", sep=""))){
+            fail_sexcheck_ids <- paste0(out, ".fail-sexcheck.IDs")
+            if (!file.exists(fail_sexcheck_ids)){
                 stop("filterSex is TRUE but file ", out,
                      ".fail-sexcheck.IDs does not exist")
             } else {
                 if (verbose) {
                     message("Read individual IDs that failed sex check")
                 }
-                removeIDs <- rbind(removeIDs,
-                                   data.table::fread(paste(out,
-                                                           ".fail-sexcheck.IDs",
-                                                           sep=""),
-                                                     data.table=FALSE,
-                                                     stringsAsFactors=FALSE,
-                                                     header=FALSE))
+                if (file.size(fail_sexcheck_ids) == 0) {
+                    if (verbose) {
+                        message("No individuals failed sex check")
+                    }
+                } else {
+                    removeIDs <- rbind(removeIDs,
+                                       data.table::fread(fail_sexcheck_ids,
+                                                         data.table=FALSE,
+                                                         stringsAsFactors=FALSE,
+                                                         header=FALSE))
+                }
             }
         }
         # ensure unique IDs in remove.IDs
-        removeIDs <- removeIDs[!duplicated(removeIDs),]
-        if (nrow(removeIDs) == nrow(IDs)) {
-                stop("All samples are flagged as .fail.IDs ",
-                     "no samples remaining to generate the QCed dataset.")
+        if (!is.null(removeIDs)) {
+            removeIDs <- removeIDs[!duplicated(removeIDs),]
+            if (nrow(removeIDs) == nrow(allIDs)) {
+                    stop("All samples are flagged as .fail.IDs ",
+                         "no samples remaining to generate the QCed dataset.")
+            }
+            if (verbose) message("Write file with remove IDs")
+            write.table(removeIDs, paste(out, ".remove.IDs", sep=""),
+                        col.names=FALSE, row.names=FALSE, quote=FALSE)
+            remove <- c("--remove", paste(out, ".remove.IDs", sep=""))
+            fail_samples <- nrow(removeIDs)
+        } else {
+            remove <- NULL
+            fail_samples <- 0
         }
-        if (verbose) message("Write file with remove IDs")
-        write.table(removeIDs, paste(out, ".remove.IDs", sep=""),
-                    col.names=FALSE, row.names=FALSE, quote=FALSE)
-        keepIDs <- data.table::fread(paste(prefix, ".fam", sep=""),
-                                     data.table=FALSE, stringsAsFactors=FALSE,
-                                     header=FALSE)
-        keepIDs <- keepIDs[!keepIDs[,2] %in% removeIDs[,2],1:2]
-        remove <- c("--remove", paste(out, ".remove.IDs", sep=""))
-        fail_samples <- nrow(removeIDs)
     } else {
-        keepIDs <- IDs
-        removeIDs <- NULL
         remove <- NULL
         fail_samples <- 0
     }
@@ -233,7 +291,7 @@ cleanData <- function(indir, name, qcdir=indir,
         if (is.null(hweTh)) {
             stop("filterHWE is TRUE but hweTh not specified")
         } else {
-           hwe <- c("--hwe", hweTh)
+           hwe <- c("--hwe midp", hweTh)
         }
     }
     if (filterMAF) {
@@ -274,7 +332,14 @@ cleanData <- function(indir, name, qcdir=indir,
     if (verbose) message("Remove individual IDs and markers IDs that failed QC")
     sys::exec_wait(path2plink,
                    args=c("--bfile", prefix, remove, maf, hwe, missing,
-                          "--make-bed", "--out", paste(out, ".clean", sep="")),
+                          "--make-bed", "--out", paste(out, ".clean", sep=""),
+                          args_filter),
            std_out=showPlinkOutput, std_err=showPlinkOutput)
+    keepIDs <- data.table::fread(paste0(out, ".clean.fam"), data.table=FALSE,
+                                     stringsAsFactors=FALSE,
+                                     header=FALSE)
+    keepIDs <- keepIDs[, 1:2]
+    colnames(keepIDs) <- c("FID", "IID")
+    colnames(removeIDs) <- c("FID", "IID")
     return(list(passIDs=keepIDs, failIDs=removeIDs))
 }
