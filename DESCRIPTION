@@ -1,10 +1,14 @@
 Package: plinkQC
 Type: Package
 Title: Genotype Quality Control with 'PLINK'
-Version: 0.3.4
-Authors@R: 
+Version: 1.0.0
+Authors@R: c(
     person("Hannah", "Meyer", email = "hannah.v.meyer@gmail.com",
-    role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4564-0899"))
+    role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4564-0899")),
+    person("Caroline", "Walter", email= "carowalter26@hotmail.com",
+    role = c("ctb")),
+    person("Maha", "Syed", email= "maha.s.syed@gmail.com",
+    role = c("ctb")))
 URL: https://meyer-lab-cshl.github.io/plinkQC/
 BugReports: https://github.com/meyer-lab-cshl/plinkQC/issues
 Maintainer: Hannah Meyer <hannah.v.meyer@gmail.com>
@@ -18,19 +22,23 @@ Description: Genotyping arrays enable the direct measurement of an individuals
     Individuals and markers that fail the quality control can subsequently be
     removed to generate a new, clean dataset. Removal of individuals based on
     relationship status is optimised to retain as many individuals as possible
-    in the study.
+    in the study. Additionally, there is a trained classifier to predict 
+    genomic ancestry of human samples.
 Depends: R (>= 3.6.0)
 Imports: methods, optparse, data.table (>= 1.11.0), R.utils, ggplot2,
-        ggforce, ggrepel, cowplot, UpSetR, dplyr, igraph (>= 1.2.4),
-        sys
+        ggrepel, cowplot, UpSetR, dplyr, igraph (>= 1.2.4), sys,
+        randomForest, stats, tidyr
 Suggests: testthat, mockery, formatR, knitr, rmarkdown
 License: MIT + file LICENSE
 SystemRequirements: plink (1.9)
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2021-07-15 15:22:27 UTC; hannah
-Author: Hannah Meyer [aut, cre] (<https://orcid.org/0000-0003-4564-0899>)
+Packaged: 2025-11-25 19:54:44 UTC; syed
+Author: Hannah Meyer [aut, cre] (ORCID:
+    <https://orcid.org/0000-0003-4564-0899>),
+  Caroline Walter [ctb],
+  Maha Syed [ctb]
 Repository: CRAN
-Date/Publication: 2021-07-15 15:40:02 UTC
+Date/Publication: 2025-11-25 21:10:02 UTC

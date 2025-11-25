@@ -11,8 +11,8 @@ cleanData(
   filterSex = TRUE,
   filterHeterozygosity = TRUE,
   filterSampleMissingness = TRUE,
-  filterAncestry = TRUE,
   filterRelated = TRUE,
+  filterAncestry = TRUE,
   filterSNPMissingness = TRUE,
   lmissTh = 0.01,
   filterHWE = TRUE,
@@ -61,15 +61,16 @@ check for excessive missing genotype rates (via
 (automatically created by \code{\link{perIndividualQC}} if
 do.evaluate_check_het_and_miss set to TRUE).}
 
-\item{filterAncestry}{[logical] Set to exclude samples that failed ancestry
-check (via \code{\link{check_ancestry}} or \code{\link{perIndividualQC}}).
-Requires file qcdir/name.fail-ancestry.IDs (automatically created by
-\code{\link{perIndividualQC}} if do.check_ancestry set to TRUE).}
-
 \item{filterRelated}{[logical] Set to exclude samples that failed relatedness
 check (via \code{\link{check_relatedness}} or \code{\link{perIndividualQC}}).
 Requires file qcdir/name.fail-IBD.IDs (automatically created by
 \code{\link{perIndividualQC}} if do.evaluate_check_relatedness set to TRUE).}
+
+\item{filterAncestry}{[logical] Set to exclude samples that are
+excluded for ancestry (via \code{\link{ancestry_prediction}} or 
+\code{\link{perIndividualQC}}).
+Requires file qcdir/name.exclude-ancestry.IDs (automatically created by
+\code{\link{perIndividualQC}} if do.evaluate_check_sex set to TRUE).}
 
 \item{filterSNPMissingness}{[logical] Set to exclude markers that have
 excessive missing rates across samples (via
@@ -169,7 +170,7 @@ path2plink=path2plink)
 
 ## Create new dataset of individuals and markers passing QC
 ids_all <- cleanData(indir=indir, qcdir=qcdir, name=name, macTh=15,
-verbose=TRUE, path2plink=path2plink, filterAncestry=FALSE,
+verbose=TRUE, path2plink=path2plink,
 filterRelated=TRUE)
 
 # Run qc on subset of samples and markers in the dataset
@@ -179,7 +180,7 @@ remove_individuals_file <- system.file("extdata", "remove_individuals",
 package="plinkQC")
 
 fail_individuals <- perIndividualQC(indir=indir, qcdir=qcdir, name=name,
-dont.check_ancestry = TRUE, interactive=FALSE, verbose=FALSE,
+ interactive=FALSE, verbose=FALSE,
 highlight_samples = highlight_samples[,2], highlight_type = "label",
 remove_individuals = remove_individuals_file, path2plink=path2plink)
 
@@ -189,7 +190,7 @@ path2plink=path2plink)
 
 ## Create new dataset of individuals and markers passing QC
 ids_all <- cleanData(indir=indir, qcdir=qcdir, name=name, macTh=15,
-verbose=TRUE, path2plink=path2plink, filterAncestry=FALSE,
+verbose=TRUE, path2plink=path2plink, 
 remove_individuals = remove_individuals_file)
 }
 }

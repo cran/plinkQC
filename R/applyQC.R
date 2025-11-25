@@ -17,10 +17,6 @@
 #' check (via \code{\link{check_relatedness}} or \code{\link{perIndividualQC}}).
 #' Requires file qcdir/name.fail-IBD.IDs (automatically created by
 #' \code{\link{perIndividualQC}} if do.evaluate_check_relatedness set to TRUE).
-#' @param filterAncestry [logical] Set to exclude samples that failed ancestry
-#' check (via \code{\link{check_ancestry}} or \code{\link{perIndividualQC}}).
-#' Requires file qcdir/name.fail-ancestry.IDs (automatically created by
-#' \code{\link{perIndividualQC}} if do.check_ancestry set to TRUE).
 #' @param filterHeterozygosity [logical] Set to exclude samples that failed
 #' check for outlying heterozygosity rates (via
 #' \code{\link{check_het_and_miss}} or
@@ -36,6 +32,11 @@
 #' @param filterSex [logical] Set to exclude samples that failed the sex
 #' check (via \code{\link{check_sex}} or \code{\link{perIndividualQC}}).
 #' Requires file qcdir/name.fail-sexcheck.IDs (automatically created by
+#' \code{\link{perIndividualQC}} if do.evaluate_check_sex set to TRUE).
+#' @param filterAncestry [logical] Set to exclude samples that are
+#' excluded for ancestry (via \code{\link{ancestry_prediction}} or 
+#' \code{\link{perIndividualQC}}).
+#' Requires file qcdir/name.exclude-ancestry.IDs (automatically created by
 #' \code{\link{perIndividualQC}} if do.evaluate_check_sex set to TRUE).
 #' @param filterHWE [logical] Set to exclude markers that fail HWE exact test
 #' (via \code{\link{check_hwe}} or \code{\link{perMarkerQC}}). Requires hweTh to
@@ -83,7 +84,7 @@
 #'
 #' ## Create new dataset of individuals and markers passing QC
 #' ids_all <- cleanData(indir=indir, qcdir=qcdir, name=name, macTh=15,
-#' verbose=TRUE, path2plink=path2plink, filterAncestry=FALSE,
+#' verbose=TRUE, path2plink=path2plink,
 #' filterRelated=TRUE)
 #'
 #' # Run qc on subset of samples and markers in the dataset
@@ -93,7 +94,7 @@
 #' package="plinkQC")
 #'
 #' fail_individuals <- perIndividualQC(indir=indir, qcdir=qcdir, name=name,
-#' dont.check_ancestry = TRUE, interactive=FALSE, verbose=FALSE,
+#'  interactive=FALSE, verbose=FALSE,
 #' highlight_samples = highlight_samples[,2], highlight_type = "label",
 #' remove_individuals = remove_individuals_file, path2plink=path2plink)
 #'
@@ -103,14 +104,15 @@
 #'
 #' ## Create new dataset of individuals and markers passing QC
 #' ids_all <- cleanData(indir=indir, qcdir=qcdir, name=name, macTh=15,
-#' verbose=TRUE, path2plink=path2plink, filterAncestry=FALSE,
+#' verbose=TRUE, path2plink=path2plink, 
 #' remove_individuals = remove_individuals_file)
 #' }
 
 cleanData <- function(indir, name, qcdir=indir,
                       filterSex=TRUE, filterHeterozygosity=TRUE,
                       filterSampleMissingness=TRUE,
-                      filterAncestry=TRUE, filterRelated=TRUE,
+                      filterRelated=TRUE,
+                      filterAncestry=TRUE,
                       filterSNPMissingness=TRUE, lmissTh=0.01,
                       filterHWE=TRUE, hweTh=1e-5,
                       filterMAF=TRUE, macTh=20, mafTh=NULL,
@@ -120,8 +122,9 @@ cleanData <- function(indir, name, qcdir=indir,
                       exclude_markers=NULL,
                       extract_markers=NULL,
                       showPlinkOutput=TRUE) {
-    sampleFilter <- c(filterAncestry, filterRelated, filterSex,
-                      filterHeterozygosity, filterSampleMissingness)
+    sampleFilter <- c(filterRelated, filterSex,
+                      filterHeterozygosity, filterSampleMissingness, 
+                      filterAncestry)
     markerFilter <- c(filterHWE, filterMAF, filterSNPMissingness)
 
     prefix <- makepath(indir, name)
@@ -167,28 +170,6 @@ cleanData <- function(indir, name, qcdir=indir,
                 } else {
                     removeIDs <- rbind(removeIDs,
                                        data.table::fread(fail_ibd_ids,
-                                                         data.table=FALSE,
-                                                         stringsAsFactors=FALSE,
-                                                         header=FALSE))
-                }
-            }
-        }
-        if (filterAncestry) {
-            fail_ancestry_ids <- paste0(out, ".fail-ancestry.IDs")
-            if (!file.exists(fail_ancestry_ids)){
-                stop("filterAncestry is TRUE but file ", out,
-                     ".fail-ancestry.IDs does not exist")
-            } else {
-                if (verbose) {
-                    message("Read individual IDs that failed ancestry check")
-                }
-                if (file.size(fail_ancestry_ids) == 0) {
-                    if (verbose) {
-                        message("No individuals failed ancestry check")
-                    }
-                } else {
-                    removeIDs <- rbind(removeIDs,
-                                       data.table::fread(fail_ancestry_ids,
                                                          data.table=FALSE,
                                                          stringsAsFactors=FALSE,
                                                          header=FALSE))
@@ -262,6 +243,29 @@ cleanData <- function(indir, name, qcdir=indir,
                 }
             }
         }
+      
+      if (filterAncestry) {
+        exclude_ancestry_ids <- paste0(out, ".exclude-ancestry.IDs")
+        if (!file.exists(exclude_ancestry_ids)){
+          stop("filterAncestry is TRUE but file ", out,
+               ".exclude-ancestry.IDs does not exist")
+        } else {
+          if (verbose) {
+            message("Read individual IDs that are excluded for ancestry check")
+          }
+          if (file.size(exclude_ancestry_ids) == 0) {
+            if (verbose) {
+              message("No individuals are excluded for ancestry")
+            }
+          } else {
+            removeIDs <- rbind(removeIDs,
+                               data.table::fread(exclude_ancestry_ids,
+                                                 data.table=FALSE,
+                                                 stringsAsFactors=FALSE,
+                                                 header=FALSE))
+          }
+        }
+      }
         # ensure unique IDs in remove.IDs
         if (!is.null(removeIDs)) {
             removeIDs <- removeIDs[!duplicated(removeIDs),]
@@ -339,7 +343,16 @@ cleanData <- function(indir, name, qcdir=indir,
                                      stringsAsFactors=FALSE,
                                      header=FALSE)
     keepIDs <- keepIDs[, 1:2]
+    
+    if (nrow(keepIDs) == 0) {
+      message("No samples pass quality control filters.")
+    } 
     colnames(keepIDs) <- c("FID", "IID")
+    
+    if (is.null(removeIDs) || nrow(removeIDs) == 0) {
+      return(list(passIDs=keepIDs, failIDs=removeIDs))
+    } 
+    
     colnames(removeIDs) <- c("FID", "IID")
     return(list(passIDs=keepIDs, failIDs=removeIDs))
 }

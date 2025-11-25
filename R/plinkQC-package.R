@@ -1,17 +1,18 @@
-#' plinkQC
-#'
-#' Genotype Quality Control with 'PLINK'
-#'
-#' @docType package
+#' @keywords internal
+"_PACKAGE"
+
+## usethis namespace: start
 #' @name plinkQC
 #' @import ggplot2
+#' @importFrom randomForest randomForest
 #' @importFrom methods getPackageName as
-#' @importFrom utils read.table write.table combn
+#' @importFrom utils read.table write.table combn read.csv 
 #' @importFrom optparse make_option parse_args OptionParser
 #' @importFrom dplyr filter select select_
+#' @importFrom tidyr pivot_longer
 #' @importFrom cowplot plot_grid
 #' @importFrom UpSetR upset
 #' @importFrom methods is
-#' @importFrom stats sd
-#' @keywords internal
+#' @importFrom stats sd predict median 
+## usethis namespace: end
 NULL
