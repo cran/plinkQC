@@ -1,9 +1,13 @@
+# plinkQC 1.0.1
+## minor changes
+* Fixed a bug so that ancestry prediction function works when there are phenotypes included in the input data.
+
 # plinkQC 1.0.0
 ## major changes
 * Added a pre-trained random forest classifier to predict genomic ancestry with the functions ancestry_prediction()
 * Added the new random forest classifier as a flag to perIndividualQC() and cleanData() so the user can filter out selected ancestries.
 * Updated check_relatedness() to run more 
-efficiently. The function now has a slower run-time and increased the number of samples retained in edge cases. 
+efficiently. The function now has a faster run-time and increased the number of samples retained in edge cases. 
 
 ## minor changes
 * Added checkplink2 to return the correct path for plink v2 
