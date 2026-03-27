@@ -85,7 +85,8 @@ knitr::include_graphics("checkRelatedness.png")
 # anc_check <- ancestry_prediction(indir=indir, qcdir=qcdir, name=name,
 #                                          interactive=TRUE,
 #                                          path2plink2=path2plink2,
-#                                          path2load_mat = path2load_mat)
+#                                          path2load_mat = path2load_mat,
+#                                          plink2format = FALSE)
 
 ## ----load anc graph, out.width = "500px", echo=FALSE, fig.align='center'------
 knitr::include_graphics("ancestral_prediction.png")

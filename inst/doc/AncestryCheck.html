@@ -11,7 +11,7 @@
 
 <meta name="author" content="Maha Syed and Caroline Walter" />
 
-<meta name="date" content="2026-02-09" />
+<meta name="date" content="2026-03-26" />
 
 <title>Training a Random Forest Classifier for Population Structure Identification</title>
 
@@ -1646,7 +1646,7 @@ display: none;
 <h1 class="title toc-ignore">Training a Random Forest Classifier for
 Population Structure Identification</h1>
 <h4 class="author">Maha Syed and Caroline Walter</h4>
-<h4 class="date">2026-02-09</h4>
+<h4 class="date">2026-03-26</h4>
 
 </div>
 
@@ -1871,25 +1871,38 @@ ancestry_rf &lt;- randomForest(Ancestry ~ .,
                         method = &quot;rf&quot;, 
                         ntree = 750,
                         importance = TRUE)
-ancestry_rf</code></pre>
+ancestry_rf
+
+saveRDS(ancestry_rf, file = &quot;ancestry_rf.RDS&quot;)</code></pre>
 </div>
 <div id="predicting-ancestries-of-new-study-data" class="section level3">
 <h3>Predicting ancestries of new study data</h3>
-<p>To predict the ancestries of a new study dataset with our trained
-random forest, you need to project the newdata onto the principal
-components of the reference dataset. This is done with the –score
-function in plink2. The projection is then used as input for the random
-forest.</p>
-<pre class="bash"><code>plink2 --pfile newdata 
-       --read-freq all_hg38.pca.acount 
-       --score all_hg38.pca.eigenvec.allele 2 6 header-read no-mean-imputation variance-standardize 
-       --score-col-nums 7-26 --out newdata.projection</code></pre>
+<p>The include <code>ancestry_prediction</code> function within the
+package allows users to put in their trained models and loading matrices
+paths. After projecting the data and running it through the classifier,
+the program will format the predictions in a dataframe and easy to see
+visualization. The user must provide three things: a path to the trained
+classifier (as a RDS format), path to the loading matrixes, and a list
+of the names of labels used in the classifier.</p>
+<pre class="r"><code>library(plinkQC)
+
+indir = &quot;.&quot;
+qcdir = &quot;.&quot;
+name = &quot;studydata&quot;
+path2plink2 = &quot;plink2&quot;
+path2load_mat = &quot;path/to/loading/matrix&quot;
+rf_path = &quot;path/to/ancestry_rf.RDS&quot;
+rf_labels = c(&quot;column&quot;, &quot;labels&quot;, &quot;in&quot;, &quot;classifier&quot;)
+
+ancestry_prediction(indir = indir, qcdir = qcdir, name = studydata, 
+                    path2plink2 = path2plink2, path2load_mat = path2load_mat,
+                    rf_path = rf_path, rf_labels = rf_labels)</code></pre>
 <p>Then, we can use the random forest to predict the ancestry of the new
 data.</p>
-<pre class="r"><code>filepath &lt;- &quot;Insert path to newdata.sscore here&quot;
-newdata &lt;- read.csv(
-  file= filepath, 
-  sep=&#39;\t&#39;, header = TRUE)
+<pre class="r"><code>name &lt;- &quot;name of the data&quot;
+indir &lt;- &quot;filepath&quot;
+qcdir &lt;- &quot;filepath&quot;
+path2load_mat &lt;- &quot;all_hg38.pca&quot;
 
 newdata &lt;- newdata %&gt;%
   select(-c(ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM))
@@ -1897,8 +1910,8 @@ colnames(newdata) &lt;- c(&quot;ID&quot;, paste0(&quot;PC&quot;, 1:20))
 
 predictions &lt;- predict(ancestry_rf, newdata)</code></pre>
 </div>
-<div id="evalulating-and-tuning-classification" class="section level3">
-<h3>Evalulating and Tuning Classification</h3>
+<div id="evalulating-and-tuning-of-classification-model" class="section level3">
+<h3>Evalulating and Tuning of Classification Model</h3>
 <p>To evaluate the accuracy of the model, a commonly used metric is the
 out-of-bag (OOB) error rate and confusion matrix. The confusion matrix
 displays the number of correct classifications for each ancestry along

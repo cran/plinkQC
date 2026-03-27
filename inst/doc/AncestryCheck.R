@@ -83,12 +83,29 @@ knitr::opts_chunk$set(
 #                         ntree = 750,
 #                         importance = TRUE)
 # ancestry_rf
+# 
+# saveRDS(ancestry_rf, file = "ancestry_rf.RDS")
+
+## ----predict_ancestry, eval=FALSE---------------------------------------------
+# library(plinkQC)
+# 
+# indir = "."
+# qcdir = "."
+# name = "studydata"
+# path2plink2 = "plink2"
+# path2load_mat = "path/to/loading/matrix"
+# rf_path = "path/to/ancestry_rf.RDS"
+# rf_labels = c("column", "labels", "in", "classifier")
+# 
+# ancestry_prediction(indir = indir, qcdir = qcdir, name = studydata,
+#                     path2plink2 = path2plink2, path2load_mat = path2load_mat,
+#                     rf_path = rf_path, rf_labels = rf_labels)
 
 ## ----eval = FALSE-------------------------------------------------------------
-# filepath <- "Insert path to newdata.sscore here"
-# newdata <- read.csv(
-#   file= filepath,
-#   sep='\t', header = TRUE)
+# name <- "name of the data"
+# indir <- "filepath"
+# qcdir <- "filepath"
+# path2load_mat <- "all_hg38.pca"
 # 
 # newdata <- newdata %>%
 #   select(-c(ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM))
